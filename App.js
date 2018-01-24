@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Video } from 'expo';
 import axios from 'axios'
 
-
+const { width, height } = Dimensions.get('window'); 
 
 export default class App extends React.Component {
   constructor(props, context) {
@@ -26,11 +26,11 @@ export default class App extends React.Component {
   async componentDidMount() {
   
     //  http://localhost:5000/v1/venues/search?q=
-    //  https://concertly-app.herokuapp.com/v1/venues/search?q=VIC&o=0
+    // http://localhost:5000/v1/venues/search/uk?q=London&o=2
     // onLoad pass location data, GET first item(venue) in db with most videos
     // then pass eventId, GET videos in that event, load latest posted video
     // querying VIC will only return melbourne events as data returned is only scraped via gis location of melbourne region
-      const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search?q=NSW&o=0');
+      const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0');
       console.log(venueRequest.data.payload)
   
     //  this.noVenueData(venueRequest)
@@ -52,7 +52,9 @@ export default class App extends React.Component {
         isVenueLoading: false
       });
     }
+
   render() {
+    
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, venueBefore} = this.state;
     if (this.state.isVenueLoading) {
       // add in loading spinner
@@ -63,27 +65,29 @@ export default class App extends React.Component {
       );
     }
     return (
-      <View style={styles.container}>
        <Video
         source={{ uri: videos[selectedVidIndex].instaVideoLink }}
         rate={1.0}
-        volume={1.0}
-        muted={false}
+        volume={0.0}
+        muted={true}
         resizeMode="cover"
         shouldPlay
         isLooping
-        style={{ width: 300, height: 300 }}
+        style={styles.VideoContainer}
+        //style={{ width: Dimension.get('window').width, height: Dimensions.get('window').height }}
       />
-      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  VideoContainer: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    height: height,
+    width: width
+
   },
 });
