@@ -108,10 +108,21 @@ _getMMSSFromMillis(millis) {
           this.swiper.scrollBy(1)
           // pass row event id data
           this.setState({eventId: `${event.eventId}`,})
-          // console.log(eventId)
+          this._handleSelectedEvent()
         }}
       />
     );
+  }
+
+ async _handleSelectedEvent () {
+    // pass eventId from selected row
+    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + this.state.eventId);
+    console.log(videoRequest)
+    // update video state with new videos
+    this.setState(prevState => ({
+      videos: videoRequest.data.payload,
+      selectedVidIndex: 0,
+    }));
   }
 
     viewStyle() {
