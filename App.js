@@ -63,12 +63,16 @@ export default class App extends React.Component {
     // GET all events currently on in London
     const allEventsRequest = await axios.get('http://localhost:5000/v1/venues/allevents/uk?q=London');
     // console.log(allEventsRequest.data.payload)
+
+    // GET upcoming events in London
+    const upcomingEventsRequest = await axios.get('http://localhost:5000/v1/venues/upcoming/uk?q=London');
+    console.log(upcomingEventsRequest.data.payload)
   
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(allEventsRequest.data.payload),
-        // events: allEventsRequest.data.payload,
+        dataSource: this.state.dataSource.cloneWithRows(allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload)),
         venue:  venueRequest.data.payload,
         videos: videoRequest.data.payload,
+        upcomingEvents : upcomingEventsRequest.data.payload,
         selectedVenueIndex: 0,
         selectedVidIndex: 0,
        // city: this.props.location.state.city,
@@ -96,23 +100,23 @@ _getMMSSFromMillis(millis) {
   return padWithZero(minutes) + ':' + padWithZero(seconds);
 }
 
-  _renderRow = (eventObj) => {
-    const event = eventObj
-    return (
-      <Row
-        // Pass event object
-        event={event}
-        // Pass a function to handle row presses
-        onPress={()=>{
-          // Navigate back to Home video screen
-          this.swiper.scrollBy(1)
-          // pass row event id data
-          this.setState({eventId: `${event.eventId}`,})
-          this._handleSelectedEvent()
-        }}
-      />
-    );
-  }
+_renderRow = (eventObj) => {
+  const event = eventObj
+  return (
+    <Row
+      // Pass event object
+      event={event}
+      // Pass a function to handle row presses
+      onPress={()=>{
+        // Navigate back to Home video screen
+        this.swiper.scrollBy(1)
+        // pass row event id data
+        this.setState({eventId: `${event.eventId}`,})
+        this._handleSelectedEvent()
+      }}
+    />
+  );
+}
 
  async _handleSelectedEvent () {
     // pass eventId from selected row

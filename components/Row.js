@@ -18,7 +18,7 @@ export default class Row extends Component {
       // Extract event and onPress props passed from List component
       render({ event, onPress } = this.props) {
         // Extract values from event object
-        const { eventName, id } = event;
+        const { eventName, id, upcomingEvent } = event;
         return (
           // Row press handler
           <TouchableOpacity
@@ -30,7 +30,7 @@ export default class Row extends Component {
             activeOpacity={0.7}
           >
             {/* Background image */}
-            <ImageBackground source={{uri: 'https://www.billboard.com/articles/news/7655338/bruce-springsteen-cover-band-cancels-inauguration-performance'}} style={styles.imageBackground}>
+            <ImageBackground source={{uri: 'https://www.billboard.com/articles/news/7655338/bruce-springsteen-cover-band-cancels-inauguration-performance'}} style={ !upcomingEvent ? styles.imageBackground : styles.imageBackgroundUpcoming }>
               {/* Title */}
               <Text style={[styles.text, styles.title]}>{eventName.toUpperCase()}</Text>
               {/* Rating */}
@@ -47,7 +47,6 @@ export default class Row extends Component {
           </TouchableOpacity>
         );
       }
-    
     }
 
     const styles = StyleSheet.create({
@@ -58,6 +57,13 @@ export default class Row extends Component {
         // Background image
         imageBackground: {
           height: screen.height / 3,          // Divide screen height by 3
+          justifyContent: 'center',           // Center vertically
+          alignItems: 'center',               // Center horizontally
+          backgroundColor: randomcolor(),
+        },
+        // Background image upcoming events
+        imageBackgroundUpcoming: {
+          height: screen.height / 6,          // Divide screen height by 6
           justifyContent: 'center',           // Center vertically
           alignItems: 'center',               // Center horizontally
           backgroundColor: randomcolor(),
