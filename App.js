@@ -1,12 +1,25 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView } from 'react-native'
-import { Video } from 'expo'
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  Dimensions, 
+  ListView, 
+  FlatList,
+  TouchableOpacity, 
+  Image,              // Renders background image
+  ImageBackground,
+  ActivityIndicator } from 'react-native'
+import { Button} from 'react-native-elements'
+import { Video, LinearGradient } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
-import Row from './components/Row'
+// import Row from './components/Row'
 import { AnimatedCircularProgress } from 'react-native-circular-progress'
 
+// Detect screen size to calculate row height
+const screen = Dimensions.get('window');
 const { width, height } = Dimensions.get('window'); 
 
 class TitleText extends React.Component {
@@ -30,6 +43,7 @@ export default class App extends React.Component {
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
+      data: null,
       playbackInstanceDuration: null,
       venue: [],
       videos: [],
@@ -69,7 +83,8 @@ export default class App extends React.Component {
     console.log(upcomingEventsRequest.data.payload)
   
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload)),
+        // dataSource: this.state.dataSource.cloneWithRows(allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload)),
+        data: allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload),
         venue:  venueRequest.data.payload,
         videos: videoRequest.data.payload,
         upcomingEvents : upcomingEventsRequest.data.payload,
@@ -132,7 +147,7 @@ _renderRow = (eventObj) => {
     viewStyle() {
       return {
         flex: 1,
-        backgroundColor: randomcolor(),
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
       }
@@ -153,11 +168,25 @@ _renderRow = (eventObj) => {
     if (this.state.isVenueLoading) {
       // loading spinner
       return (
-      <View>
-        <Text>Loadong...</Text>
-       </View>
+        <View style={styles.container}>
+          <ActivityIndicator size="large"/>
+        </View>
       );
     }
+
+    <LinearGradient
+    colors={['#4c669f', '#3b5998', '#192f6a']}
+    style={{ padding: 15, alignItems: 'center', borderRadius: 5 }}>
+    <Text
+      style={{
+        backgroundColor: 'transparent',
+        fontSize: 15,
+        color: '#fff',
+      }}>
+      Sign in with Facebook
+    </Text>
+  </LinearGradient>
+
     return (
       <Swiper
       loop={false}
@@ -166,19 +195,52 @@ _renderRow = (eventObj) => {
       ref={(swiper) => {this.swiper = swiper;}}
       >
       <View style={this.viewStyle()}>
-      <ListView
+         <FlatList
+          data={this.state.data}
+          renderItem={rowParameter =>  {
+          const rowData = rowParameter.item
+            return (
+              <TouchableOpacity
+              // Pass row style
+              style={styles.row}
+              // Call onPress function passed from List component when pressed
+              onPress={()=>{
+                // Navigate back to Home video screen
+                this.swiper.scrollBy(1)
+                // pass row event id data
+                this.setState({eventId: `${rowData.eventId}`,})
+                this._handleSelectedEvent()
+              }}
+              // Dim row a little bit when pressed
+              activeOpacity={0.7}
+            >
+              <LinearGradient
+                  colors={['#00249b', '#1a0057']}
+                  start={[0.1,0.1]}
+                  end={[0.5,0.5]}
+                  style={{ padding: 15, borderRadius: 9 }}>
+                {/* Background */}
+                <View style={ !rowData.upcomingEvent ? styles.listBackground : styles.imageBackgroundUpcoming }>
+                  {/* Title */}
+                  <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
+                      {/* Venue Name */}
+                      <Text style={[styles.text]}>{rowData.place.name}</Text> 
+                </View>
+                <Button
+                  title='Watch'
+                  rounded
+                  buttonStyle={styles.button}
+                />
+              </LinearGradient>
+            </TouchableOpacity>
+            )
+          }}
+        />
+      {/* <ListView
       // Data source from state
       dataSource={this.state.dataSource}
       // Row renderer method
-      renderRow={this._renderRow}
-      // Refresh the list on pull down
-      // refreshControl={
-      //   <RefreshControl
-      //     refreshing={this.state.isRefreshing}
-      //     onRefresh={this._fetchData}
-      //   />
-      // }
-    />
+      renderRow={this._renderRow}/> */}
       </View>
       <Swiper
         horizontal={false}
@@ -243,4 +305,45 @@ const styles = StyleSheet.create({
     height: height,
     width: width
   },
+  // Row
+  row: {
+    padding: 10,                   // Add padding at the bottom
+  },
+  // Background image
+  listBackground: {
+    height: screen.height / 5,          // Divide screen height by 3
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',               // Center horizontally
+  },
+  // Background image upcoming events
+  imageBackgroundUpcoming: {
+    height: screen.height / 2,          // Divide screen height by 6
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',               // Center horizontally
+    backgroundColor: '#fff',
+  },
+  // Shared text style
+  text: {
+    color: '#fff',                      // White text color
+    backgroundColor: 'transparent',     // No background
+    fontFamily: 'Avenir',               // Change default font
+    fontWeight: 'bold',                 // Bold font
+    // Add text shadow
+    textShadowColor: '#222',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
+  },
+  // Movie title
+  title: {
+    fontSize: 22,                       // Bigger font size
+  },
+  // Rating row
+  rating: {
+    flexDirection: 'row',               // Arrange icon and rating in one line
+  },
+  button: {
+    backgroundColor: 'blue',
+    alignSelf: 'stretch',
+    flex:1,
+  }
 });
