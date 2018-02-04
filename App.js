@@ -51,8 +51,6 @@ export default class App extends React.Component {
       selectedVenueIndex: 0,
       selectedVidIndex: 0,
       next: 1,
-      city: {},
-      countryState: {},
       isVenueLoading: true,
       displayMediaInfo: false,
       venueBefore: false,
@@ -83,15 +81,12 @@ export default class App extends React.Component {
     console.log(upcomingEventsRequest.data.payload)
   
       this.setState({
-        // dataSource: this.state.dataSource.cloneWithRows(allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload)),
         data: allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload),
         venue:  venueRequest.data.payload,
         videos: videoRequest.data.payload,
         upcomingEvents : upcomingEventsRequest.data.payload,
         selectedVenueIndex: 0,
         selectedVidIndex: 0,
-       // city: this.props.location.state.city,
-       // countryState: this.props.location.state.countryState,
         vidLink: videoRequest.data.payload[0].instaVideoLink,
         isVenueLoading: false
       });
@@ -173,20 +168,6 @@ _renderRow = (eventObj) => {
         </View>
       );
     }
-
-    <LinearGradient
-    colors={['#4c669f', '#3b5998', '#192f6a']}
-    style={{ padding: 15, alignItems: 'center', borderRadius: 5 }}>
-    <Text
-      style={{
-        backgroundColor: 'transparent',
-        fontSize: 15,
-        color: '#fff',
-      }}>
-      Sign in with Facebook
-    </Text>
-  </LinearGradient>
-
     return (
       <Swiper
       loop={false}
@@ -214,33 +195,40 @@ _renderRow = (eventObj) => {
               // Dim row a little bit when pressed
               activeOpacity={0.7}
             >
-              <LinearGradient
-                  colors={['#00249b', '#1a0057']}
-                  start={[0.1,0.1]}
-                  end={[0.5,0.5]}
-                  style={{ padding: 15, borderRadius: 9 }}>
-                {/* Background */}
-                <View style={ !rowData.upcomingEvent ? styles.listBackground : styles.imageBackgroundUpcoming }>
-                  {/* Title */}
-                  <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                      {/* Venue Name */}
-                      <Text style={[styles.text]}>{rowData.place.name}</Text> 
-                </View>
-                <Button
-                  title='Watch'
-                  rounded
-                  buttonStyle={styles.button}
-                />
-              </LinearGradient>
+              { !rowData.upcomingEvent
+                ?  <LinearGradient
+                      colors={['#00249b', '#1a0057']}
+                      start={[0.1,0.1]}
+                      end={[0.5,0.5]}
+                      style={{ padding: 10, borderRadius: 9 }}>
+                    {/* Background */}
+                    <View style={ styles.listBackground }>
+                      {/* Title */}
+                      <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
+                          {/* Venue Name */}
+                          <Text style={[styles.text]}>{rowData.place.name}</Text> 
+                    </View>
+                    <Button
+                      title={ 'Watch' }
+                      rounded
+                      buttonStyle={styles.button}
+                    />
+                  </LinearGradient>
+                : <ImageBackground source={{uri: rowData.upcomingArt }} style={ styles.imageBackgroundUpcoming }>
+                    <View style={ styles.bgContainer }>
+                      <Button
+                        title={ 'Watch most recent gig' }
+                        rounded
+                        buttonStyle={styles.button}
+                      />
+                    </View> 
+                  </ImageBackground>
+              }
             </TouchableOpacity>
             )
           }}
+          keyExtractor={rowData => rowData.id}
         />
-      {/* <ListView
-      // Data source from state
-      dataSource={this.state.dataSource}
-      // Row renderer method
-      renderRow={this._renderRow}/> */}
       </View>
       <Swiper
         horizontal={false}
@@ -273,7 +261,6 @@ _renderRow = (eventObj) => {
         shouldPlay
         isLooping
         style={styles.VideoContainer}
-        //style={{ width: Dimension.get('window').width, height: Dimensions.get('window').height }}
       />
         </View>
         <View style={this.viewStyle()}>
@@ -307,7 +294,7 @@ const styles = StyleSheet.create({
   },
   // Row
   row: {
-    padding: 10,                   // Add padding at the bottom
+    padding: 5  ,                   // Add padding at the bottom
   },
   // Background image
   listBackground: {
@@ -315,12 +302,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',               // Center horizontally
   },
+  // container for the button for upcoming
+  bgContainer: {
+    position: 'absolute',
+    bottom:0,
+    left: 0,
+    right: 0,
+    paddingBottom: 10,
+    borderRadius: 9,
+  },
   // Background image upcoming events
   imageBackgroundUpcoming: {
     height: screen.height / 2,          // Divide screen height by 6
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',               // Center horizontally
-    backgroundColor: '#fff',
+    borderRadius: 25,
   },
   // Shared text style
   text: {
