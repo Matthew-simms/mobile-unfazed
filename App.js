@@ -1,22 +1,34 @@
 import React from 'react'
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  Dimensions, 
-  ListView, 
-  FlatList,
-  TouchableOpacity, 
-  Image,              // Renders background image
-  ImageBackground,
-  ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground,ActivityIndicator, Slider, Vibration } from 'react-native'
 import { Button} from 'react-native-elements'
-import { Video, LinearGradient, Camera, Permissions } from 'expo'
+import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
 // import Row from './components/Row'
 import { AnimatedCircularProgress } from 'react-native-circular-progress'
+import isIPhoneX from 'react-native-is-iphonex';
+import GalleryScreen from './components/GalleryScreen';
+
+// Camera settings
+const landmarkSize = 2;
+
+const flashModeOrder = {
+  off: 'on',
+  on: 'auto',
+  auto: 'torch',
+  torch: 'off',
+};
+
+const wbOrder = {
+  auto: 'sunny',
+  sunny: 'cloudy',
+  cloudy: 'shadow',
+  shadow: 'fluorescent',
+  fluorescent: 'incandescent',
+  incandescent: 'auto',
+};
+
 
 // Detect screen size to calculate row height
 const screen = Dimensions.get('window');
@@ -54,15 +66,31 @@ export default class App extends React.Component {
       isVenueLoading: true,
       displayMediaInfo: false,
       venueBefore: false,
-      hasCameraPermission: null,
-      type: Camera.Constants.Type.back,
+      // Camera state
+      flash: 'off',
+      zoom: 0,
+      autoFocus: 'on',
+      depth: 0,
+      type: 'back',
+      whiteBalance: 'auto',
+      ratio: '16:9',
+      ratios: [],
+      photoId: 1,
+      showGallery: false,
+      photos: [],
+      faces: [],
+      permissionsGranted: false,
     }
   }
 
   async componentDidMount() {
     // Camera Permisisons
-      const { status } = await Permissions.askAsync(Permissions.CAMERA);
-      this.setState({ hasCameraPermission: status === 'granted' });
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ permissionsGranted: status === 'granted' });
+
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
+      console.log(e, 'Directory exists');
+    });
     /* 
      * http://localhost:5000/v1/venues/search/uk?q=London&o=2
      * onLoad pass location data, GET first item(venue) in db with most videos
@@ -114,6 +142,186 @@ export default class App extends React.Component {
         isVenueLoading: false
       });
     }
+
+// Camera 
+getRatios = async () => {
+  const ratios = await this.camera.getSupportedRatios();
+  return ratios;
+};
+
+toggleView() {
+  this.setState({
+    showGallery: !this.state.showGallery,
+  });
+}
+
+toggleFacing() {
+  this.setState({
+    type: this.state.type === 'back' ? 'front' : 'back',
+  });
+}
+
+toggleFlash() {
+  this.setState({
+    flash: flashModeOrder[this.state.flash],
+  });
+}
+
+setRatio(ratio) {
+  this.setState({
+    ratio,
+  });
+}
+
+toggleWB() {
+  this.setState({
+    whiteBalance: wbOrder[this.state.whiteBalance],
+  });
+}
+
+toggleFocus() {
+  this.setState({
+    autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
+  });
+}
+
+zoomOut() {
+  this.setState({
+    zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
+  });
+}
+
+zoomIn() {
+  this.setState({
+    zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
+  });
+}
+
+setFocusDepth(depth) {
+  this.setState({
+    depth,
+  });
+}
+
+takePicture = async function() {
+  if (this.camera) {
+    this.camera.takePictureAsync().then(data => {
+      FileSystem.moveAsync({
+        from: data.uri,
+        to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
+      }).then(() => {
+        this.setState({
+          photoId: this.state.photoId + 1,
+        });
+        Vibration.vibrate();
+      });
+    });
+  }
+};
+
+
+renderGallery() {
+  return <GalleryScreen onPress={this.toggleView.bind(this)} />;
+}
+
+renderNoPermissions() {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
+      <Text style={{ color: 'white' }}>
+        Camera permissions not granted - cannot open camera preview.
+      </Text>
+    </View>
+  );
+}
+
+renderCamera() {
+  return (
+    <Camera
+      ref={ref => {
+        this.camera = ref;
+      }}
+      style={{
+        flex: 1,
+      }}
+      type={this.state.type}
+      flashMode={this.state.flash}
+      autoFocus={this.state.autoFocus}
+      zoom={this.state.zoom}
+      whiteBalance={this.state.whiteBalance}
+      ratio={this.state.ratio}
+      focusDepth={this.state.depth}>
+      <View
+        style={{
+          flex: 0.5,
+          backgroundColor: 'transparent',
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          paddingTop: Constants.statusBarHeight / 2,
+        }}>
+        <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
+          <Text style={styles.flipText}> FLIP </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
+          <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.flipButton} onPress={this.toggleWB.bind(this)}>
+          <Text style={styles.flipText}> WB: {this.state.whiteBalance} </Text>
+        </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          flex: 0.4,
+          backgroundColor: 'transparent',
+          flexDirection: 'row',
+          alignSelf: 'flex-end',
+          marginBottom: -5,
+        }}>
+        {this.state.autoFocus !== 'on' ? (
+          <Slider
+            style={{ width: 150, marginTop: 15, marginRight: 15, alignSelf: 'flex-end' }}
+            onValueChange={this.setFocusDepth.bind(this)}
+            step={0.1}
+          />
+        ) : null}
+      </View>
+      <View
+        style={{
+          flex: 0.1,
+          paddingBottom: isIPhoneX ? 20 : 0,
+          backgroundColor: 'transparent',
+          flexDirection: 'row',
+          alignSelf: 'flex-end',
+        }}>
+        <TouchableOpacity
+          style={[styles.flipButton, { flex: 0.1, alignSelf: 'flex-end' }]}
+          onPress={this.zoomIn.bind(this)}>
+          <Text style={styles.flipText}> + </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.flipButton, { flex: 0.1, alignSelf: 'flex-end' }]}
+          onPress={this.zoomOut.bind(this)}>
+          <Text style={styles.flipText}> - </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.flipButton, { flex: 0.25, alignSelf: 'flex-end' }]}
+          onPress={this.toggleFocus.bind(this)}>
+          <Text style={styles.flipText}> AF : {this.state.autoFocus} </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.flipButton, styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
+          onPress={this.takePicture.bind(this)}>
+          <Text style={styles.flipText}> SNAP </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.flipButton, styles.galleryButton, { flex: 0.25, alignSelf: 'flex-end' }]}
+          onPress={this.toggleView.bind(this)}>
+          <Text style={styles.flipText}> Gallery </Text>
+        </TouchableOpacity>
+      </View>
+    </Camera>
+  );
+}
+// END camera
   
 // Controls view
 _getMMSSFromMillis(millis) {
@@ -165,7 +373,7 @@ _renderRow = (eventObj) => {
     viewStyle() {
       return {
         flex: 1,
-        backgroundColor: '#00249B',
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
       }
@@ -181,7 +389,6 @@ _renderRow = (eventObj) => {
       
 
   render() {
-    
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, venueBefore, hasCameraPermission} = this.state;
     if (this.state.isVenueLoading) {
       // loading spinner
@@ -191,12 +398,10 @@ _renderRow = (eventObj) => {
         </View>
       );
     }
-
-    if (hasCameraPermission === null) {
-      return <Text>null access to camera</Text>
-    } else if (hasCameraPermission === false) {
-      return <Text>No access to camera</Text>;
-    } else {
+    const cameraScreenContent = this.state.permissionsGranted
+    ? this.renderCamera()
+    : this.renderNoPermissions();
+    const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
     return (
       <Swiper
       loop={false}
@@ -238,6 +443,7 @@ _renderRow = (eventObj) => {
                           <Text style={[styles.text]}>{rowData.place.name}</Text> 
                     </View>
                     <Button
+                      onPress={this.zoomOut.bind(this)}
                       title={ 'Watch' }
                       rounded
                       buttonStyle={styles.button}
@@ -296,40 +502,11 @@ _renderRow = (eventObj) => {
           <TitleText label="Bottom" />
         </View>
       </Swiper>        
-      <View style={this.viewStyle()}>
-          <Camera style={{ flex: 1 }} type={this.state.type}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'transparent',
-                flexDirection: 'row',
-              }}>
-              <TouchableOpacity
-                style={{
-                  flex: 0.1,
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                }}
-                onPress={() => {
-                  this.setState({
-                    type: this.state.type === Camera.Constants.Type.back
-                      ? Camera.Constants.Type.front
-                      : Camera.Constants.Type.back,
-                  });
-                }}>
-                <Text
-                  style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
-                  {' '}Flip{' '}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Camera>
-      </View>
+        <View style={styles.camContainer}>{content}</View>
     </Swiper>
     )
    }
   }
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -397,5 +574,56 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     alignSelf: 'stretch',
     flex:1,
+  },
+  /* 
+   * CAMERA STYLES
+   */ 
+  camContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  navigation: {
+    flex: 1,
+  },
+  gallery: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  flipButton: {
+    flex: 0.3,
+    height: 40,
+    marginHorizontal: 2,
+    marginBottom: 10,
+    marginTop: 20,
+    borderRadius: 8,
+    borderColor: 'white',
+    borderWidth: 1,
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  flipText: {
+    color: 'white',
+    fontSize: 15,
+  },
+  item: {
+    margin: 4,
+    backgroundColor: 'indianred',
+    height: 35,
+    width: 80,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  picButton: {
+    backgroundColor: 'darkseagreen',
+  },
+  galleryButton: {
+    backgroundColor: 'indianred',
+  },
+  camRow: {
+    flexDirection: 'row',
+    },
   }
-});
+);
