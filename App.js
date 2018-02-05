@@ -11,7 +11,7 @@ import {
   ImageBackground,
   ActivityIndicator } from 'react-native'
 import { Button} from 'react-native-elements'
-import { Video, LinearGradient } from 'expo'
+import { Video, LinearGradient, Camera, Permissions } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -54,30 +54,53 @@ export default class App extends React.Component {
       isVenueLoading: true,
       displayMediaInfo: false,
       venueBefore: false,
+      hasCameraPermission: null,
+      type: Camera.Constants.Type.back,
     }
   }
 
   async componentDidMount() {
-  
-    // http://localhost:5000/v1/venues/search/uk?q=London&o=2
-    // onLoad pass location data, GET first item(venue) in db with most videos
-    // then pass eventId, GET videos in that event, load latest posted video
-      const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0');
+    // Camera Permisisons
+      const { status } = await Permissions.askAsync(Permissions.CAMERA);
+      this.setState({ hasCameraPermission: status === 'granted' });
+    /* 
+     * http://localhost:5000/v1/venues/search/uk?q=London&o=2
+     * onLoad pass location data, GET first item(venue) in db with most videos
+     * then pass eventId, GET videos in that event, load latest posted video
+     */
+      const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0')
+      .catch(function(error) {
+        console.log('There has been a problem with your venueRequest fetch operation: ' + error.message);
+          throw error;
+        })
       console.log(venueRequest.data.payload)
+
     //  this.noVenueData(venueRequest)
   
       // console.log(venueRequest.data.payload[0].place.name)
-      const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + venueRequest.data.payload[0].eventId);
+      const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + venueRequest.data.payload[0].eventId)
+      .catch(function(error) {
+        console.log('There has been a problem with your videoRequest fetch operation: ' + error.message);
+          throw error;
+        })
       console.log(videoRequest.data.payload[0])
   
     // this.noVideoData(videoRequest)
 
     // GET all events currently on in London
-    const allEventsRequest = await axios.get('http://localhost:5000/v1/venues/allevents/uk?q=London');
+    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
+    .catch(function(error) {
+      console.log('There has been a problem with your allEventsRequest fetch operation: ' + error.message);
+        throw error;
+      });
     // console.log(allEventsRequest.data.payload)
 
     // GET upcoming events in London
-    const upcomingEventsRequest = await axios.get('http://localhost:5000/v1/venues/upcoming/uk?q=London');
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
+    .catch(function(error) {
+      console.log('There has been a problem with your upcomingEventsRequest fetch operation: ' + error.message);
+        throw error;
+      })
     console.log(upcomingEventsRequest.data.payload)
   
       this.setState({
@@ -142,7 +165,7 @@ _renderRow = (eventObj) => {
     viewStyle() {
       return {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#00249B',
         justifyContent: 'center',
         alignItems: 'center',
       }
@@ -159,7 +182,7 @@ _renderRow = (eventObj) => {
 
   render() {
     
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, venueBefore} = this.state;
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, venueBefore, hasCameraPermission} = this.state;
     if (this.state.isVenueLoading) {
       // loading spinner
       return (
@@ -168,6 +191,12 @@ _renderRow = (eventObj) => {
         </View>
       );
     }
+
+    if (hasCameraPermission === null) {
+      return <Text>null access to camera</Text>
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
     return (
       <Swiper
       loop={false}
@@ -200,7 +229,7 @@ _renderRow = (eventObj) => {
                       colors={['#00249b', '#1a0057']}
                       start={[0.1,0.1]}
                       end={[0.5,0.5]}
-                      style={{ padding: 10, borderRadius: 9 }}>
+                      style={{ padding: 20, borderRadius: 9 }}>
                     {/* Background */}
                     <View style={ styles.listBackground }>
                       {/* Title */}
@@ -268,10 +297,37 @@ _renderRow = (eventObj) => {
         </View>
       </Swiper>        
       <View style={this.viewStyle()}>
-        <TitleText label="Right" />
+          <Camera style={{ flex: 1 }} type={this.state.type}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+              }}>
+              <TouchableOpacity
+                style={{
+                  flex: 0.1,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  this.setState({
+                    type: this.state.type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back,
+                  });
+                }}>
+                <Text
+                  style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+                  {' '}Flip{' '}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Camera>
       </View>
     </Swiper>
-    );
+    )
+   }
   }
 }
 
