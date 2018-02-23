@@ -403,6 +403,15 @@ _getMMSSFromMillis(millis) {
       shouldPlay: playbackStatus.shouldPlay,
     });
   }
+
+  _nextVideo = (e) => {
+      if(this.state.selectedVidIndex == this.state.videos.length - 1)
+      return;
+
+      this.setState(prevState => ({
+      selectedVidIndex: prevState.selectedVidIndex + 1
+      }))
+    }
       
 
   render() {
@@ -488,28 +497,33 @@ _getMMSSFromMillis(millis) {
           <TitleText label="Top" />
         </View>
         <View style={this.viewStyle()}>
-        <Text>
-          {this._getMMSSFromMillis(this.state.playbackInstanceDuration)}
-        </Text>
-        {/* <AnimatedCircularProgress
-          size={120}
-          width={15}
-          fill={100}
-          tintColor="#00e0ff"
-          onAnimationComplete={() => console.log('onAnimationComplete')}
-          backgroundColor="#3d5875" /> */}
-        <Video
-        source={{ uri: videos[selectedVidIndex].instaVideoLink }}
-        onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
-        rate={1.0}
-        volume={0.0}
-        muted={true}
-        resizeMode="cover"
-        shouldPlay
-        isLooping
-        style={styles.VideoContainer}
-      />
-        </View>
+          <TouchableOpacity
+           onPress={(e) => this._nextVideo(e, this)}
+           activeOpacity={0.7}
+          >
+          <Text>
+            {this._getMMSSFromMillis(this.state.playbackInstanceDuration)}
+          </Text>
+          {/* <AnimatedCircularProgress
+            size={120}
+            width={15}
+            fill={100}
+            tintColor="#00e0ff"
+            onAnimationComplete={() => console.log('onAnimationComplete')}
+            backgroundColor="#3d5875" /> */}
+          <Video
+          source={{ uri: videos[selectedVidIndex].instaVideoLink }}
+          onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
+          rate={1.0}
+          volume={0.0}
+          muted={true}
+          resizeMode="cover"
+          shouldPlay
+          isLooping
+          style={styles.VideoContainer}
+        />
+        </TouchableOpacity>
+      </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>
         <ScrollView>
