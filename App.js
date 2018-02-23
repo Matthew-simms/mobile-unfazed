@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground,ActivityIndicator, Slider, Vibration } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground,ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
 import { Button} from 'react-native-elements'
 import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, } from 'expo'
 import axios from 'axios'
@@ -58,6 +58,7 @@ export default class App extends React.Component {
       data: null,
       playbackInstanceDuration: null,
       venue: [],
+      currentVenue: [],
       videos: [],
       eventId: null,
       selectedVenueIndex: 0,
@@ -96,44 +97,41 @@ export default class App extends React.Component {
      * onLoad pass location data, GET first item(venue) in db with most videos
      * then pass eventId, GET videos in that event, load latest posted video
      */
-      const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0')
-      .catch(function(error) {
-        console.log('There has been a problem with your venueRequest fetch operation: ' + error.message);
-          throw error;
-        })
-      console.log(venueRequest.data.payload)
+      // const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0')
+      // .catch(function(error) {
+      //   console.log(error.message);
+      //     throw error;
+      //   })
+      // console.log('Venue' + JSON.stringify(venueRequest.data.payload))
+  
 
-    //  this.noVenueData(venueRequest)
+      // GET all events currently on in London
+      const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
+      console.log('all events' + allEventsRequest.data.payload)
+        //  this.noVenueData(allEventsRequest)
   
       // console.log(venueRequest.data.payload[0].place.name)
-      const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + venueRequest.data.payload[0].eventId)
+      const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
       .catch(function(error) {
-        console.log('There has been a problem with your videoRequest fetch operation: ' + error.message);
+        console.log(error.message);
           throw error;
         })
       console.log(videoRequest.data.payload[0])
   
     // this.noVideoData(videoRequest)
 
-    // GET all events currently on in London
-    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-    .catch(function(error) {
-      console.log('There has been a problem with your allEventsRequest fetch operation: ' + error.message);
-        throw error;
-      });
-    // console.log(allEventsRequest.data.payload)
-
     // GET upcoming events in London
     const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
     .catch(function(error) {
-      console.log('There has been a problem with your upcomingEventsRequest fetch operation: ' + error.message);
+      console.log(error.message);
         throw error;
       })
     console.log(upcomingEventsRequest.data.payload)
   
       this.setState({
         data: allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload),
-        venue:  venueRequest.data.payload,
+        venue:  allEventsRequest.data.payload,
+        currentVenue: allEventsRequest.data.payload[0],
         videos: videoRequest.data.payload,
         upcomingEvents : upcomingEventsRequest.data.payload,
         selectedVenueIndex: 0,
@@ -141,6 +139,7 @@ export default class App extends React.Component {
         vidLink: videoRequest.data.payload[0].instaVideoLink,
         isVenueLoading: false
       });
+      console.log(this.state.currentVenue)
     }
 
 // Camera 
@@ -341,22 +340,18 @@ _getMMSSFromMillis(millis) {
   return padWithZero(minutes) + ':' + padWithZero(seconds);
 }
 
-_renderRow = (eventObj) => {
-  const event = eventObj
-  return (
-    <Row
-      // Pass event object
-      event={event}
-      // Pass a function to handle row presses
-      onPress={()=>{
-        // Navigate back to Home video screen
-        this.swiper.scrollBy(1)
-        // pass row event id data
-        this.setState({eventId: `${event.eventId}`,})
-        this._handleSelectedEvent()
-      }}
-    />
-  );
+ _onRowPress = ( rowData ) => {
+  // Navigate back to Home video screen
+  this.swiper.scrollBy(1)
+  // pass row event id data
+  this.setState(prevState => ({ 
+    eventId: rowData.eventId,
+    currentVenue: rowData,
+    // selectedVenueIndex: rowData.index
+   }))
+   console.log(rowData)
+   // update selectedVenueIndex
+  this._handleSelectedEvent()
 }
 
  async _handleSelectedEvent () {
@@ -389,7 +384,7 @@ _renderRow = (eventObj) => {
       
 
   render() {
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, venueBefore, hasCameraPermission} = this.state;
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
     if (this.state.isVenueLoading) {
       // loading spinner
       return (
@@ -414,18 +409,13 @@ _renderRow = (eventObj) => {
           data={this.state.data}
           renderItem={rowParameter =>  {
           const rowData = rowParameter.item
+         // console.log('rowData'+ rowData)
             return (
               <TouchableOpacity
               // Pass row style
               style={styles.row}
               // Call onPress function passed from List component when pressed
-              onPress={()=>{
-                // Navigate back to Home video screen
-                this.swiper.scrollBy(1)
-                // pass row event id data
-                this.setState({eventId: `${rowData.eventId}`,})
-                this._handleSelectedEvent()
-              }}
+              onPress={this._onRowPress.bind(this, rowData)}
               // Dim row a little bit when pressed
               activeOpacity={0.7}
             >
@@ -443,7 +433,7 @@ _renderRow = (eventObj) => {
                           <Text style={[styles.text]}>{rowData.place.name}</Text> 
                     </View>
                     <Button
-                      onPress={this.zoomOut.bind(this)}
+                      onPress={this._onRowPress.bind(this, rowData)}
                       title={ 'Watch' }
                       rounded
                       buttonStyle={styles.button}
@@ -498,8 +488,23 @@ _renderRow = (eventObj) => {
         style={styles.VideoContainer}
       />
         </View>
+        {/* Event Details View */}
         <View style={this.viewStyle()}>
-          <TitleText label="Bottom" />
+        <ScrollView>
+          <LinearGradient
+            colors={['#00249b', '#1a0057']}
+            start={[0.1,0.1]}
+            end={[0.5,0.5]}>
+          {/* Background */}
+          <View style={ styles.listBackground }>
+            {/* Title */}
+            <Text style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+              {/* Venue Name */}
+              <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
+          </View>
+            <Text style={[styles.text]}>{currentVenue.description}</Text>
+        </LinearGradient>
+        </ScrollView>
         </View>
       </Swiper>        
         <View style={styles.camContainer}>{content}</View>
