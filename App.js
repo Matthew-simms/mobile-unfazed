@@ -107,8 +107,8 @@ export default class App extends React.Component {
 
       // GET all events currently on in London
       const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-      console.log('all events' + allEventsRequest.data.payload)
-        //  this.noVenueData(allEventsRequest)
+      console.log(allEventsRequest.data.payload)
+      this.noVenueData(allEventsRequest)
   
       // console.log(venueRequest.data.payload[0].place.name)
       const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
@@ -117,8 +117,7 @@ export default class App extends React.Component {
           throw error;
         })
       console.log(videoRequest.data.payload[0])
-  
-    // this.noVideoData(videoRequest)
+      this.noVideoData(videoRequest)
 
     // GET upcoming events in London
     const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
@@ -141,6 +140,28 @@ export default class App extends React.Component {
       });
       console.log(this.state.currentVenue)
     }
+
+    // method to check if there is venue data
+noVenueData(allEventsRequest) {
+  if (allEventsRequest.data.payload.length == 0) {
+    this.setState(prevState => ({
+      isVenueLoading: false,
+    }))
+    return;
+  }
+}
+
+noVideoData(videoRequest) {
+  // check if there is data if none goto next venue
+  if (videoRequest.data.payload.length == 0) {
+   this.setState(prevState => ({
+     isVenueLoading: false,
+     selectedVenueIndex: 1,
+   }))
+   this._ToggleNextVenue()
+   return;
+ }
+}
 
 // Camera 
 getRatios = async () => {
@@ -363,6 +384,7 @@ _getMMSSFromMillis(millis) {
       videos: videoRequest.data.payload,
       selectedVidIndex: 0,
     }));
+    this.noVideoData(videoRequest)
   }
 
     viewStyle() {
