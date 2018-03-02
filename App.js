@@ -67,6 +67,10 @@ export default class App extends React.Component {
       isVenueLoading: true,
       displayMediaInfo: false,
       venueBefore: false,
+      shouldPlay: false,
+      isPlaying: false,
+      isBuffering: false,
+      isLoading: true,
       // Camera state
       flash: 'off',
       zoom: 0,
@@ -397,23 +401,34 @@ _getMMSSFromMillis(millis) {
     }
 
     _playbackCallback(playbackStatus) {
-    this.setState({
-      playbackInstancePosition: playbackStatus.positionMillis,
-      playbackInstanceDuration: playbackStatus.durationMillis,
-      shouldPlay: playbackStatus.shouldPlay,
-    });
+      if (playbackStatus.isLoaded) {
+        this.setState({
+          playbackInstancePosition: playbackStatus.positionMillis,
+          playbackInstanceDuration: playbackStatus.durationMillis,
+          shouldPlay: playbackStatus.shouldPlay,
+          isPlaying: playbackStatus.isPlaying,
+          isBuffering: playbackStatus.isBuffering,
+          rate: playbackStatus.rate,
+          muted: playbackStatus.isMuted,
+          volume: playbackStatus.volume,
+          shouldCorrectPitch: playbackStatus.shouldCorrectPitch,
+        });
+
+        if (playbackStatus.didJustFinish) {
+          // The player has just finished playing and will stop.
+          this._nextVideo()
+        }
+      }
   }
 
   _nextVideo = (e) => {
-      if(this.state.selectedVidIndex == this.state.videos.length - 1)
-      return;
-
-      this.setState(prevState => ({
-      selectedVidIndex: prevState.selectedVidIndex + 1
-      }))
+      if (this.state.selectedVidIndex == this.state.videos.length - 1)
+        return;
+          this.setState(prevState => ({
+          selectedVidIndex: prevState.selectedVidIndex + 1,
+        }))
     }
       
-
   render() {
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
     if (this.state.isVenueLoading) {
