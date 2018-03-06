@@ -101,14 +101,6 @@ export default class App extends React.Component {
      * onLoad pass location data, GET first item(venue) in db with most videos
      * then pass eventId, GET videos in that event, load latest posted video
      */
-      // const venueRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/search/uk?q=London&o=0')
-      // .catch(function(error) {
-      //   console.log(error.message);
-      //     throw error;
-      //   })
-      // console.log('Venue' + JSON.stringify(venueRequest.data.payload))
-  
-
       // GET all events currently on in London
       const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
       console.log(allEventsRequest.data.payload)
@@ -130,9 +122,8 @@ export default class App extends React.Component {
         throw error;
       })
     console.log(upcomingEventsRequest.data.payload)
-  
+
       this.setState({
-        data: allEventsRequest.data.payload.concat(upcomingEventsRequest.data.payload),
         venue:  allEventsRequest.data.payload,
         currentVenue: allEventsRequest.data.payload[0],
         videos: videoRequest.data.payload,
@@ -143,7 +134,63 @@ export default class App extends React.Component {
         isVenueLoading: false
       });
       console.log(this.state.currentVenue)
+      await this.getUserFaces(allEventsRequest)
     }
+
+// GET fake user photos from www.uifaces.co/api add to eventsOn array
+    async getUserFaces (allEventsRequest)  {
+      const events =  allEventsRequest.data.payload
+      const arr = []
+      arr.push(events)
+      console.log(arr)
+      await Promise.all(events.map(async arr => {
+        console.log(arr.videoCount); 
+        let videoCount = arr.videoCount
+        if (videoCount >= 8) {
+          videoCount = 8
+        }
+        const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
+        .then((userFaces) => {
+          { arr.uiFaces = userFaces.data;}
+          })
+        const user = await response
+        console.log(user);
+      }))
+      this.setState(prevState => ({
+        venue: arr,
+        data: this.state.venue.concat(this.state.upcomingEvents)
+      }))
+      console.log(this.state.data);
+    }
+
+// GET fake user photos from www.uifaces.co/api 
+// amend uiFaces array to allEventsRequest data
+// async getUserFaces(allEventsRequest) {
+//   const events =  allEventsRequest.data.payload
+//   const arr = []
+//   arr.push(events)
+//   console.log(arr)
+
+//   const objs = events.map(async (arr, index) => {
+//     console.log(arr.videoCount); 
+//     const videoCount = arr.videoCount
+//       const userFacesRequest = await axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
+//       .then((userFaces) => {
+//         { arr.uiFaces = userFaces.data;}
+//         const newEvent = arr  
+//         console.log(newEvent)
+//         })
+//     })
+//     await Promise.all(objs).then((completed) => console.log( `\nResult: ${completed}`));
+//     await this.addEventToArray(objs)
+//   }
+
+// async addEventToArray(objs) {
+//   console.log(objs)
+// }
+  // async concatList(event) {
+    
+  // }
 
     // method to check if there is venue data
 noVenueData(allEventsRequest) {
@@ -428,6 +475,16 @@ _getMMSSFromMillis(millis) {
           selectedVidIndex: prevState.selectedVidIndex + 1,
         }))
     }
+
+    UiPrinter(array) {
+      return array.map(function(images, index) {
+        // don't put your key as index, choose other unique values as your key.
+        return <Image
+          key={index}
+          source={{uri: images.photo}}
+          style={ styles.uiFace } />
+      })
+    }
       
   render() {
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
@@ -478,6 +535,9 @@ _getMMSSFromMillis(millis) {
                           {/* Venue Name */}
                           <Text style={[styles.text]}>{rowData.place.name}</Text> 
                     </View>
+                    <View style={styles.imageRow}>
+                      {this.UiPrinter(rowData.uiFaces)}
+                    </View> 
                     <Button
                       onPress={this._onRowPress.bind(this, rowData)}
                       title={ 'Watch' }
@@ -630,6 +690,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     alignSelf: 'stretch',
     flex:1,
+  },
+  // UI faces on list
+  uiFace: {
+    height: 34,
+    width: 34,
+    borderRadius: 17,
+    marginLeft: -10,  
+  },
+  // UI faces row
+  imageRow: {
+    flexDirection: 'row',
+    paddingBottom: 10,
   },
   /* 
    * CAMERA STYLES
