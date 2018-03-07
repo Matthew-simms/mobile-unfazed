@@ -137,60 +137,50 @@ export default class App extends React.Component {
       await this.getUserFaces(allEventsRequest)
     }
 
-// GET fake user photos from www.uifaces.co/api add to eventsOn array
-    async getUserFaces (allEventsRequest)  {
-      const events =  allEventsRequest.data.payload
-      const arr = []
-      arr.push(events)
-      console.log(arr)
-      await Promise.all(events.map(async arr => {
-        console.log(arr.videoCount); 
-        let videoCount = arr.videoCount
-        if (videoCount >= 8) {
-          videoCount = 8
-        }
-        const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
-        .then((userFaces) => {
-          { arr.uiFaces = userFaces.data;}
-          })
-        const user = await response
-        console.log(user);
-      }))
-      this.setState(prevState => ({
-        venue: arr,
-        data: this.state.venue.concat(this.state.upcomingEvents)
-      }))
-      console.log(this.state.data);
-    }
+  // GET fake user photos from www.uifaces.co/api add to eventsOn array
+  async getUserFaces (allEventsRequest)  {
+    const events =  allEventsRequest.data.payload
+    const arr = []
+    arr.push(events)
+    // console.log(arr)
+    await Promise.all(events.map(async arr => {
+      console.log(arr.videoCount); 
+      let videoCount = arr.videoCount
+      if (videoCount >= 8) {
+        videoCount = 8
+      }
+      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
+      .then((userFaces) => {
+        { arr.uiFaces = userFaces.data;}
+        })
+      const user = await response
+      console.log(user);
+    }))
+    this.setState(prevState => ({
+      venue: arr,
+    }))
+    // console.log(this.state.data);
+    await this.getEventBgImg()
+  }
 
-// GET fake user photos from www.uifaces.co/api 
-// amend uiFaces array to allEventsRequest data
-// async getUserFaces(allEventsRequest) {
-//   const events =  allEventsRequest.data.payload
-//   const arr = []
-//   arr.push(events)
-//   console.log(arr)
-
-//   const objs = events.map(async (arr, index) => {
-//     console.log(arr.videoCount); 
-//     const videoCount = arr.videoCount
-//       const userFacesRequest = await axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
-//       .then((userFaces) => {
-//         { arr.uiFaces = userFaces.data;}
-//         const newEvent = arr  
-//         console.log(newEvent)
-//         })
-//     })
-//     await Promise.all(objs).then((completed) => console.log( `\nResult: ${completed}`));
-//     await this.addEventToArray(objs)
-//   }
-
-// async addEventToArray(objs) {
-//   console.log(objs)
-// }
-  // async concatList(event) {
-    
-  // }
+  // GET list background images for each event add to eventsOn array
+  async getEventBgImg() {
+    let bgImgLen = await this.state.venue[0].length
+    console.log(bgImgLen)
+    const arr = this.state.venue[0]
+    const bgImgRes = await axios.get('http://localhost:5000/v1/venues/image?q=' + bgImgLen)
+    bgImg = bgImgRes.data.payload
+    console.log(bgImg)
+    arr.forEach(function(itm){
+      { itm.bgImgs = bgImg;}
+     });
+     this.setState(prevState => ({
+      venue: arr,
+      data: arr.concat(this.state.upcomingEvents)
+    }))
+    console.log(this.state.venue)
+    console.log(this.state.data)
+  }
 
     // method to check if there is venue data
 noVenueData(allEventsRequest) {
