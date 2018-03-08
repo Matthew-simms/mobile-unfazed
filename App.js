@@ -1,11 +1,10 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground,ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
 import { Button} from 'react-native-elements'
-import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font } from 'expo'
+import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font, AppLoading } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
-// import Row from './components/Row'
 import { AnimatedCircularProgress } from 'react-native-circular-progress'
 import isIPhoneX from 'react-native-is-iphonex';
 import GalleryScreen from './components/GalleryScreen';
@@ -72,6 +71,11 @@ export default class App extends React.Component {
       isBuffering: false,
       isLoading: true,
       fontLoaded: false,
+      isReady: false,
+      bgImgsLoaded: false,
+      listColor: [
+        ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
+        ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
       // Camera state
       flash: 'off',
       zoom: 0,
@@ -178,6 +182,7 @@ export default class App extends React.Component {
       { itm.bgImgs = bgImg;}
      });
      this.setState(prevState => ({
+      bgImgsLoaded: true,
       venue: arr,
       data: arr.concat(this.state.upcomingEvents)
     }))
@@ -478,6 +483,7 @@ _getMMSSFromMillis(millis) {
       }
   }
 
+  // next video function
   _nextVideo = (e) => {
       if (this.state.selectedVidIndex == this.state.videos.length - 1)
         return;
@@ -486,6 +492,7 @@ _getMMSSFromMillis(millis) {
         }))
     }
 
+    // Map array and show UI faces in render
     UiPrinter(array) {
       return array.map(function(images, index) {
         // don't put your key as index, choose other unique values as your key.
@@ -495,21 +502,37 @@ _getMMSSFromMillis(millis) {
           style={ styles.uiFace } />
       })
     }
+
+    // function to choose a random index in an array
+    _handleRandomIndex(arr) {
+      return arr[Math.floor(Math.random() * arr.length)]
+    }
+
+    // Date Time converter to local
+    _convertUTCDateToLocalDate(UTCdate) {
+      var newDate = new Date(UTCdate);
+      return newDate;
+      console.log(newDate)  
+    }
       
   render() {
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
-    if (this.state.isVenueLoading) {
-      // loading spinner
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator size="large"/>
-        </View>
-      );
-    }
+    // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
     ? this.renderCamera()
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
+
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
+    if (this.state.isVenueLoading || !this.state.isReady || !this.state.bgImgsLoaded) {
+      return (
+        <AppLoading
+          startAsync={this._loadFontsAsync}
+          onFinish={() => this.setState({ isReady: true })}
+          onError={console.warn}
+        />
+      );
+    }
+
     return (
       <Swiper
       loop={false}
@@ -533,22 +556,20 @@ _getMMSSFromMillis(millis) {
               activeOpacity={0.7}
             >
               { !rowData.upcomingEvent
-                ? // select an image at random from the array
-                  <ImageBackground source={{uri: rowData.bgImgs[Math.floor(Math.random() * rowData.bgImgs.length)].image_link }} borderRadius={9} style={ styles.imageBackground }> 
+                ? <ImageBackground source={{uri: this._handleRandomIndex(rowData.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }> 
                     <LinearGradient
-                          colors={['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)']}
+                          colors={ this._handleRandomIndex(this.state.listColor) }
                           start={[0.1,0.1]}
                           end={[0.5,0.5]}
                           style={{ padding: 20, borderRadius: 9 }}>
                         {/* Background */}
                         <View style={ styles.listBackground }>
+                          {/* onNow */}
+                          <Text style={[styles.text, styles.red]}>On Now</Text> 
                           {/* Title */}
-                          { this.state.fontLoaded ? (
                           <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                          ) : null
-                          }
-                              {/* Venue Name */}
-                              <Text style={[styles.text]}>{rowData.place.name}</Text> 
+                          {/* Venue Name */}
+                          <Text style={[styles.text]}>@ {rowData.place.name}</Text> 
                         </View>
                         <View style={styles.imageRow}>
                           {this.UiPrinter(rowData.uiFaces)}
@@ -563,11 +584,20 @@ _getMMSSFromMillis(millis) {
                    </ImageBackground> 
                 : <ImageBackground source={{uri: rowData.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
                     <View style={ styles.bgContainer }>
-                      <Button
-                        title={ 'Watch most recent gig' }
-                        rounded
-                        buttonStyle={styles.button}
-                      />
+                      {/* Background */}
+                      <View style={ styles.listBackground }>
+                        {/* up coming */}
+                        <Text style={[styles.text]}>Upcoming</Text>
+                        {/* Title */}
+                        <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
+                        {/* Venue Name */}
+                        <Text style={[styles.text]}>@ {rowData.place.name} { [this._convertUTCDateToLocalDate(rowData.startTime).toString()] }</Text> 
+                      </View> 
+                        <Button
+                          title={ 'Watch most recent gig' }
+                          rounded
+                          buttonStyle={styles.button}
+                        />
                     </View> 
                   </ImageBackground>
               }
@@ -625,7 +655,7 @@ _getMMSSFromMillis(millis) {
           {/* Background */}
           <View style={ styles.listBackground }>
             {/* Title */}
-            <Text style={[styles.text, styles.text]}>{currentVenue.eventName.toUpperCase()}</Text>
+            <Text style={[styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
               {/* Venue Name */}
               <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
           </View>
@@ -664,8 +694,6 @@ const styles = StyleSheet.create({
   // Background 
   listBackground: {
     height: screen.height / 5,          // Divide screen height by 3
-    justifyContent: 'center',           // Center vertically
-    alignItems: 'center',               // Center horizontally
   },
   // container for the button for upcoming
   bgContainer: {
@@ -692,11 +720,10 @@ const styles = StyleSheet.create({
     color: '#fff',                      // White text color
     backgroundColor: 'transparent',     // No background
     fontFamily: 'Avenir',               // Change default font
-    fontWeight: 'bold',                 // Bold font
-    // Add text shadow
-    textShadowColor: '#222',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
+  },
+  // red color
+  red: {
+    color: '#FF0000'
   },
   // Movie title
   title: {
