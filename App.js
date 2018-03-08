@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground,ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
 import { Button} from 'react-native-elements'
-import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, } from 'expo'
+import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -71,6 +71,7 @@ export default class App extends React.Component {
       isPlaying: false,
       isBuffering: false,
       isLoading: true,
+      fontLoaded: false,
       // Camera state
       flash: 'off',
       zoom: 0,
@@ -89,6 +90,8 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
+    // load and await fonts
+    this._loadFontsAsync();
     // Camera Permisisons
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ permissionsGranted: status === 'granted' });
@@ -180,6 +183,23 @@ export default class App extends React.Component {
     }))
     console.log(this.state.venue)
     console.log(this.state.data)
+  }
+
+  // GET assets then load before app renders
+  async _loadFontsAsync() {
+    try {
+      await Font.loadAsync({
+        'katanas-edge': require('./assets/fonts/katanas-edge.ttf'),
+      });
+    } catch (e) {
+      console.warn(
+        'There was an error caching assets (see: main.js), perhaps due to a ' +
+          'network timeout, so we skipped caching. Reload the app to try again.'
+      );
+      console.log(e.message);
+    } finally {
+      this.setState({ fontLoaded: true });
+    }
   }
 
     // method to check if there is venue data
@@ -513,29 +533,35 @@ _getMMSSFromMillis(millis) {
               activeOpacity={0.7}
             >
               { !rowData.upcomingEvent
-                ?  <LinearGradient
-                      colors={['#00249b', '#1a0057']}
-                      start={[0.1,0.1]}
-                      end={[0.5,0.5]}
-                      style={{ padding: 20, borderRadius: 9 }}>
-                    {/* Background */}
-                    <View style={ styles.listBackground }>
-                      {/* Title */}
-                      <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                          {/* Venue Name */}
-                          <Text style={[styles.text]}>{rowData.place.name}</Text> 
-                    </View>
-                    <View style={styles.imageRow}>
-                      {this.UiPrinter(rowData.uiFaces)}
-                    </View> 
-                    <Button
-                      onPress={this._onRowPress.bind(this, rowData)}
-                      title={ 'Watch' }
-                      rounded
-                      buttonStyle={styles.button}
-                    />
-                  </LinearGradient>
-                : <ImageBackground source={{uri: rowData.upcomingArt }} style={ styles.imageBackgroundUpcoming }>
+                ? // select an image at random from the array
+                  <ImageBackground source={{uri: rowData.bgImgs[Math.floor(Math.random() * rowData.bgImgs.length)].image_link }} borderRadius={9} style={ styles.imageBackground }> 
+                    <LinearGradient
+                          colors={['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)']}
+                          start={[0.1,0.1]}
+                          end={[0.5,0.5]}
+                          style={{ padding: 20, borderRadius: 9 }}>
+                        {/* Background */}
+                        <View style={ styles.listBackground }>
+                          {/* Title */}
+                          { this.state.fontLoaded ? (
+                          <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
+                          ) : null
+                          }
+                              {/* Venue Name */}
+                              <Text style={[styles.text]}>{rowData.place.name}</Text> 
+                        </View>
+                        <View style={styles.imageRow}>
+                          {this.UiPrinter(rowData.uiFaces)}
+                        </View> 
+                        <Button
+                          onPress={this._onRowPress.bind(this, rowData)}
+                          title={ 'Watch' }
+                          rounded
+                          buttonStyle={styles.button}
+                        />
+                     </LinearGradient>
+                   </ImageBackground> 
+                : <ImageBackground source={{uri: rowData.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
                     <View style={ styles.bgContainer }>
                       <Button
                         title={ 'Watch most recent gig' }
@@ -599,7 +625,7 @@ _getMMSSFromMillis(millis) {
           {/* Background */}
           <View style={ styles.listBackground }>
             {/* Title */}
-            <Text style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+            <Text style={[styles.text, styles.text]}>{currentVenue.eventName.toUpperCase()}</Text>
               {/* Venue Name */}
               <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
           </View>
@@ -635,7 +661,7 @@ const styles = StyleSheet.create({
   row: {
     padding: 5  ,                   // Add padding at the bottom
   },
-  // Background image
+  // Background 
   listBackground: {
     height: screen.height / 5,          // Divide screen height by 3
     justifyContent: 'center',           // Center vertically
@@ -649,6 +675,10 @@ const styles = StyleSheet.create({
     right: 0,
     paddingBottom: 10,
     borderRadius: 9,
+  },
+  // list bg image
+  imageBackground: {
+    width: screen.width - 10,
   },
   // Background image upcoming events
   imageBackgroundUpcoming: {
@@ -671,6 +701,7 @@ const styles = StyleSheet.create({
   // Movie title
   title: {
     fontSize: 22,                       // Bigger font size
+    fontFamily: 'katanas-edge',
   },
   // Rating row
   rating: {
