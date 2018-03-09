@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
-import { Button} from 'react-native-elements'
-import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font, AppLoading } from 'expo'
+import { Button } from 'react-native-elements'
+import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -73,7 +73,6 @@ export default class Main extends React.Component {
       isBuffering: false,
       isLoading: true,
       fontLoaded: false,
-      isReady: false,
       bgImgsLoaded: false,
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
@@ -96,8 +95,6 @@ export default class Main extends React.Component {
   }
 
   async componentDidMount() {
-    // load and await fonts
-    this._loadFontsAsync();
     // Camera Permisisons
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ permissionsGranted: status === 'granted' });
@@ -191,28 +188,6 @@ export default class Main extends React.Component {
     console.log(this.state.venue)
     console.log(this.state.data)
   }
-
-  // GET assets then load before app renders
-  // async _loadFontsAsync() {
-  //   try {
-  //     await Font.loadAsync({
-  //       'katanas-edge': require('../assets/fonts/katanas-edge.ttf'),
-  //     });
-  //   } catch (e) {
-  //     console.warn(
-  //       'There was an error caching assets (see: main.js), perhaps due to a ' +
-  //         'network timeout, so we skipped caching. Reload the app to try again.'
-  //     );
-  //     console.log(e.message);
-  //   } finally {
-  //     this.setState({ fontLoaded: true });
-  //   }
-  // }
-  
-  // Test font
-     _loadFontsAsync() {
-      this.setState({ fontLoaded: true });
-    }
 
     // method to check if there is venue data
 noVenueData(allEventsRequest) {
@@ -530,15 +505,6 @@ _getMMSSFromMillis(millis) {
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
-    if ( !this.state.isReady ) {
-      return (
-        <AppLoading
-          startAsync={this._loadFontsAsync}
-          onFinish={() => this.setState({ isReady: true })}
-          onError={console.warn}
-        />
-      );
-    }
 
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded) {
       return (
@@ -743,7 +709,7 @@ const styles = StyleSheet.create({
   // Movie title
   title: {
     fontSize: 22,                       // Bigger font size
-    // fontFamily: 'katanas-edge',
+    fontFamily: 'katanas-edge',
   },
   // Rating row
   rating: {

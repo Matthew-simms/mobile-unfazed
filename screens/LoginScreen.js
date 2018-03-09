@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Button, Text } from 'react-native'
+import { View, Text } from 'react-native'
 import * as firebase from 'firebase';
 import Main from './Main';
 import { StackNavigator } from 'react-navigation';
-import { FormLabel, FormInput } from 'react-native-elements'
+import { FormLabel, FormInput, Button } from 'react-native-elements'
 
 firebase.initializeApp({
         apiKey: "AIzaSyAh5TKxXzav7bYBvyO9dKQnTtvKMxjE0C0",
@@ -20,8 +20,18 @@ export default class login extends React.Component {
         super(props);
         this.state = { email: 'Test@test.com', password: '123456', error: '', loading: false };
     }
+
+    componentDidMount() {
+
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user != null) {
+            console.log(user)
+          }
+        })
+      }
+
     onLoginPress() {
-        
+
         this.setState({ error: '', loading: true });
 
         const { email, password } = this.state;
@@ -29,13 +39,10 @@ export default class login extends React.Component {
             .then(() => {
                 this.setState({ error: '', loading: false });
                 this.props.navigation.navigate('Main');
-
             })
             .catch(() => {
                 this.setState({ error: 'Authentication failed', loading: false });
-
             })
-
     }
 
     onSignUpPress() {
@@ -45,13 +52,33 @@ export default class login extends React.Component {
             .then(() => {
                 this.setState({ error: '', loading: false });
                 this.props.navigation.navigate('Main');
-
             })
             .catch(() => {
                 this.setState({ error: 'Authentication failed', loading: false });
-
             })
     }
+
+
+  async loginWithFacebook() {
+    this.setState({ error: '', loading: true });
+    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('1972286079755935', { permissions: ['public_profile'] })
+
+    if (type == 'success') {
+    
+        
+    // add or check login info to Firebase
+      const credential = firebase.auth.FacebookAuthProvider.credential(token)
+
+     firebase.auth().signInWithCredential(credential)
+      .then(() => {
+        this.setState({ error: '', loading: false });
+        this.props.navigation.navigate('Main');
+    })
+    .catch((error) => {
+        this.setState({ error: 'Authentication failed', loading: false }); 
+      })
+    }
+  }
 
     renderButtonOrLoading() {
         if (this.state.loading) {
@@ -64,6 +91,9 @@ export default class login extends React.Component {
             <Button
                 onPress={this.onSignUpPress.bind(this)}
                 title='Sign up'/>
+            <Button
+                onPress={this.loginWithFacebook.bind(this)}
+                title='Connect With Facebook'/>
 
         </View>
 
