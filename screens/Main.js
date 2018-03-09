@@ -467,6 +467,8 @@ _getMMSSFromMillis(millis) {
 
   // next video function
   _nextVideo = (e) => {
+    this.setState({ isPlaying: false });
+
       if (this.state.selectedVidIndex == this.state.videos.length - 1)
         return;
           this.setState(prevState => ({
@@ -623,8 +625,22 @@ _getMMSSFromMillis(millis) {
           shouldPlay
           isLooping
           style={styles.VideoContainer}
+
         />
         </TouchableOpacity>
+        { !this.state.isPlaying || this.state.isBuffering ? ( 
+            <View style={this.viewStyle()}>
+              <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
+            </View>
+          ) : null }
+
+          {/* {this.state.autoFocus !== 'on' ? (
+          <Slider
+            style={{ width: 150, marginTop: 15, marginRight: 15, alignSelf: 'flex-end' }}
+            onValueChange={this.setFocusDepth.bind(this)}
+            step={0.1}
+          />
+        ) : null} */}
       </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>

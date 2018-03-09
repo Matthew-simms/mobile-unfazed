@@ -94,8 +94,7 @@ export default class login extends React.Component {
         if (this.state.loading) {
             return <Text> Loading </Text>
         }
-        return 
-        <View>
+        return <View>
             <Button
                 onPress={this.onLoginPress.bind(this)}
                 title='Login'/>
@@ -105,6 +104,7 @@ export default class login extends React.Component {
             <Button
                 onPress={this.loginWithFacebook.bind(this)}
                 title='Connect With Facebook'/>
+
         </View>
 
     }
