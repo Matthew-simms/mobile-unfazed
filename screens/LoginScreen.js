@@ -18,7 +18,12 @@ firebase.initializeApp({
 export default class login extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { email: 'Test@test.com', password: '123456', error: '', loading: false };
+        this.state = { 
+            email: 'Test@test.com', 
+            password: '123456', error: '', 
+            loading: false,
+            userInfo: null,
+         };
     }
 
     componentDidMount() {
@@ -64,8 +69,13 @@ export default class login extends React.Component {
     const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('1972286079755935', { permissions: ['public_profile'] })
 
     if (type == 'success') {
-    
-        
+    // Get user's name using the FB Graph API
+    const response = await fetch(
+        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`)
+        const userInfo = await response.json()
+        this.setState({ userInfo })
+        console.log(await userInfo)
+
     // add or check login info to Firebase
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
 
@@ -84,7 +94,8 @@ export default class login extends React.Component {
         if (this.state.loading) {
             return <Text> Loading </Text>
         }
-        return <View>
+        return 
+        <View>
             <Button
                 onPress={this.onLoginPress.bind(this)}
                 title='Login'/>
@@ -94,7 +105,6 @@ export default class login extends React.Component {
             <Button
                 onPress={this.loginWithFacebook.bind(this)}
                 title='Connect With Facebook'/>
-
         </View>
 
     }
