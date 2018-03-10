@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native'
+import { View, Text, AsyncStorage } from 'react-native'
 import * as firebase from 'firebase';
 import Main from './Main';
 import { StackNavigator } from 'react-navigation';
@@ -15,6 +15,8 @@ firebase.initializeApp({
 }
 )
 
+// const ACCESS_TOKEN = 'access_token'
+
 export default class login extends React.Component {
     constructor(props) {
         super(props);
@@ -26,14 +28,14 @@ export default class login extends React.Component {
          };
     }
 
-    componentDidMount() {
+    // async componentDidMount() {
 
-        firebase.auth().onAuthStateChanged((user) => {
-          if (user != null) {
-            console.log(user)
-          }
-        })
-      }
+    //    await firebase.auth().onAuthStateChanged((user) => {
+    //       if (user != null) {
+    //         console.log(user)
+    //       }
+    //     })
+    //   }
 
     onLoginPress() {
 
@@ -75,6 +77,12 @@ export default class login extends React.Component {
         const userInfo = await response.json()
         this.setState({ userInfo })
         console.log(await userInfo)
+
+     // Save FB token to local storage
+        // await AsyncStorage.setItem(ACCESS_TOKEN, token);
+        // console.log('----------------')
+        // console.log(token)
+        // console.log('----------------')
 
     // add or check login info to Firebase
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
