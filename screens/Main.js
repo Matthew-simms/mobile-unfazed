@@ -26,7 +26,6 @@ class TitleText extends React.Component {
   }
 }
 
-
 export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -251,6 +250,27 @@ _getMMSSFromMillis(millis) {
         }
       }
   }
+
+  _playbackCallback(playbackStatus) {
+    if (playbackStatus.isLoaded) {
+      this.setState({
+        playbackInstancePosition: playbackStatus.positionMillis,
+        playbackInstanceDuration: playbackStatus.durationMillis,
+        shouldPlay: playbackStatus.shouldPlay,
+        isPlaying: playbackStatus.isPlaying,
+        isBuffering: playbackStatus.isBuffering,
+        rate: playbackStatus.rate,
+        muted: playbackStatus.isMuted,
+        volume: playbackStatus.volume,
+        shouldCorrectPitch: playbackStatus.shouldCorrectPitch,
+      });
+
+      if (playbackStatus.didJustFinish) {
+        // The player has just finished playing and will stop.
+        this._nextVideo()
+      }
+    }
+}
 
   // next video function
   _nextVideo = (e) => {
