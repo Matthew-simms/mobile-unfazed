@@ -174,7 +174,7 @@ export default class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('http://localhost:5000/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('https://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -329,12 +329,6 @@ renderCamera() {
         <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
           <Text style={styles.flipText}> FLIP </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
-          <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.flipButton} onPress={this.toggleWB.bind(this)}>
-          <Text style={styles.flipText}> WB: {this.state.whiteBalance} </Text>
-        </TouchableOpacity>
       </View>
       <View
         style={{
@@ -360,16 +354,6 @@ renderCamera() {
           flexDirection: 'row',
           alignSelf: 'flex-end',
         }}>
-        <TouchableOpacity
-          style={[styles.flipButton, { flex: 0.1, alignSelf: 'flex-end' }]}
-          onPress={this.zoomIn.bind(this)}>
-          <Text style={styles.flipText}> + </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.flipButton, { flex: 0.1, alignSelf: 'flex-end' }]}
-          onPress={this.zoomOut.bind(this)}>
-          <Text style={styles.flipText}> - </Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.flipButton, { flex: 0.25, alignSelf: 'flex-end' }]}
           onPress={this.toggleFocus.bind(this)}>
