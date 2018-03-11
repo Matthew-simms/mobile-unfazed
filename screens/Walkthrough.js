@@ -85,7 +85,7 @@ export default class Walk extends React.Component {
         bottomButton
         showPrevButton
         showSkipButton
-        // onDone={(e) => this._handleDone(e, this)}
+        onDone={(e) => this._handleDone(e, this)}
         // hideNextButton
         // hideDoneButton
         onSkip={() => console.log("skipped")}

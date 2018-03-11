@@ -633,14 +633,6 @@ _getMMSSFromMillis(millis) {
               <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
             </View>
           ) : null }
-
-          {/* {this.state.autoFocus !== 'on' ? (
-          <Slider
-            style={{ width: 150, marginTop: 15, marginRight: 15, alignSelf: 'flex-end' }}
-            onValueChange={this.setFocusDepth.bind(this)}
-            step={0.1}
-          />
-        ) : null} */}
       </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>
