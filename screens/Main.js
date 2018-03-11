@@ -1,35 +1,16 @@
 import React from 'react'
 import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
 import { Button } from 'react-native-elements'
-import { Video, LinearGradient, Camera, Permissions, Constants,  FileSystem, Font } from 'expo'
+import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
 import { AnimatedCircularProgress } from 'react-native-circular-progress'
-import isIPhoneX from 'react-native-is-iphonex';
 import GalleryScreen from '../components/GalleryScreen';
 import RootNavigation from '../navigation/RootNavigation';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-// Camera settings
-const landmarkSize = 2;
-
-const flashModeOrder = {
-  off: 'on',
-  on: 'auto',
-  auto: 'torch',
-  torch: 'off',
-};
-
-const wbOrder = {
-  auto: 'sunny',
-  sunny: 'cloudy',
-  cloudy: 'shadow',
-  shadow: 'fluorescent',
-  fluorescent: 'incandescent',
-  incandescent: 'auto',
-};
-
+import CameraC from './Camera';
 
 // Detect screen size to calculate row height
 const screen = Dimensions.get('window');
@@ -77,20 +58,6 @@ export default class Main extends React.Component {
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
-      // Camera state
-      flash: 'off',
-      zoom: 0,
-      autoFocus: 'on',
-      depth: 0,
-      type: 'back',
-      whiteBalance: 'auto',
-      ratio: '16:9',
-      ratios: [],
-      photoId: 1,
-      showGallery: false,
-      photos: [],
-      faces: [],
-      permissionsGranted: false,
     }
   }
 
@@ -174,7 +141,7 @@ export default class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('https://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('http://localhost:5000/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -210,170 +177,6 @@ noVideoData(videoRequest) {
    return;
  }
 }
-
-// Camera 
-getRatios = async () => {
-  const ratios = await this.camera.getSupportedRatios();
-  return ratios;
-};
-
-toggleView() {
-  this.setState({
-    showGallery: !this.state.showGallery,
-  });
-}
-
-toggleFacing() {
-  this.setState({
-    type: this.state.type === 'back' ? 'front' : 'back',
-  });
-}
-
-toggleFlash() {
-  this.setState({
-    flash: flashModeOrder[this.state.flash],
-  });
-}
-
-setRatio(ratio) {
-  this.setState({
-    ratio,
-  });
-}
-
-toggleWB() {
-  this.setState({
-    whiteBalance: wbOrder[this.state.whiteBalance],
-  });
-}
-
-toggleFocus() {
-  this.setState({
-    autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
-  });
-}
-
-zoomOut() {
-  this.setState({
-    zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
-  });
-}
-
-zoomIn() {
-  this.setState({
-    zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
-  });
-}
-
-setFocusDepth(depth) {
-  this.setState({
-    depth,
-  });
-}
-
-takePicture = async function() {
-  if (this.camera) {
-    this.camera.takePictureAsync().then(data => {
-      FileSystem.moveAsync({
-        from: data.uri,
-        to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
-      }).then(() => {
-        this.setState({
-          photoId: this.state.photoId + 1,
-        });
-        Vibration.vibrate();
-      });
-    });
-  }
-};
-
-
-renderGallery() {
-  return <GalleryScreen onPress={this.toggleView.bind(this)} />;
-}
-
-renderNoPermissions() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
-      <Text style={{ color: 'white' }}>
-        Camera permissions not granted - cannot open camera preview.
-      </Text>
-    </View>
-  );
-}
-
-renderCamera() {
-  return (
-    <Camera
-      ref={ref => {
-        this.camera = ref;
-      }}
-      style={{
-        flex: 1,
-      }}
-      type={this.state.type}
-      flashMode={this.state.flash}
-      autoFocus={this.state.autoFocus}
-      zoom={this.state.zoom}
-      whiteBalance={this.state.whiteBalance}
-      ratio={this.state.ratio}
-      focusDepth={this.state.depth}>
-      <View
-        style={{
-          flex: 0.5,
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-          paddingTop: Constants.statusBarHeight / 2,
-        }}>
-        <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
-          <Text style={styles.flipText}> FLIP </Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        style={{
-          flex: 0.4,
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
-          alignSelf: 'flex-end',
-          marginBottom: -5,
-        }}>
-        {this.state.autoFocus !== 'on' ? (
-          <Slider
-            style={{ width: 150, marginTop: 15, marginRight: 15, alignSelf: 'flex-end' }}
-            onValueChange={this.setFocusDepth.bind(this)}
-            step={0.1}
-          />
-        ) : null}
-      </View>
-      <View
-        style={{
-          flex: 0.1,
-          paddingBottom: isIPhoneX ? 20 : 0,
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
-          alignSelf: 'flex-end',
-        }}>
-        <TouchableOpacity
-          style={[styles.flipButton, { flex: 0.25, alignSelf: 'flex-end' }]}
-          onPress={this.toggleFocus.bind(this)}>
-          <Text style={styles.flipText}> AF : {this.state.autoFocus} </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.flipButton, styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
-          onPress={this.takePicture.bind(this)}>
-          <Text style={styles.flipText}> SNAP </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.flipButton, styles.galleryButton, { flex: 0.25, alignSelf: 'flex-end' }]}
-          onPress={this.toggleView.bind(this)}>
-          <Text style={styles.flipText}> Gallery </Text>
-        </TouchableOpacity>
-      </View>
-    </Camera>
-  );
-}
-// END camera
   
 // Controls view
 _getMMSSFromMillis(millis) {
@@ -482,11 +285,22 @@ _getMMSSFromMillis(millis) {
       return newDate;
       console.log(newDate)  
     }
+
+// Camera Record no permissions
+    renderNoPermissions() {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
+          <Text style={{ color: 'white' }}>
+            Camera permissions not granted - cannot open camera preview.
+          </Text>
+        </View>
+      );
+    }
       
   render() {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
-    ? this.renderCamera()
+    ? <CameraC />
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
@@ -724,55 +538,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingBottom: 10,
   },
-  /* 
-   * CAMERA STYLES
-   */ 
-  camContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  navigation: {
-    flex: 1,
-  },
-  gallery: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  flipButton: {
-    flex: 0.3,
-    height: 40,
-    marginHorizontal: 2,
-    marginBottom: 10,
-    marginTop: 20,
-    borderRadius: 8,
-    borderColor: 'white',
-    borderWidth: 1,
-    padding: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flipText: {
-    color: 'white',
-    fontSize: 15,
-  },
-  item: {
-    margin: 4,
-    backgroundColor: 'indianred',
-    height: 35,
-    width: 80,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  picButton: {
-    backgroundColor: 'darkseagreen',
-  },
-  galleryButton: {
-    backgroundColor: 'indianred',
-  },
-  camRow: {
-    flexDirection: 'row',
-    },
   }
 );
