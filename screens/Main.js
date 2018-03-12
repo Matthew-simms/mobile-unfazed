@@ -233,8 +233,8 @@ _getMMSSFromMillis(millis) {
     _playbackCallback(playbackStatus) {
       if (playbackStatus.isLoaded) {
         this.setState({
-          playbackInstancePosition: playbackStatus.positionMillis,
-          playbackInstanceDuration: playbackStatus.durationMillis,
+          playbackInstancePosition:  Math.round(((playbackStatus.positionMillis / 1000) % 60)), 
+          playbackInstanceDuration:  Math.round(((playbackStatus.durationMillis / 1000) % 60)),
           shouldPlay: playbackStatus.shouldPlay,
           isPlaying: playbackStatus.isPlaying,
           isBuffering: playbackStatus.isBuffering,
@@ -242,9 +242,12 @@ _getMMSSFromMillis(millis) {
           muted: playbackStatus.isMuted,
           volume: playbackStatus.volume,
           shouldCorrectPitch: playbackStatus.shouldCorrectPitch,
+          progressTime: playbackStatus.progressUpdateIntervalMillis
         });
+        // console.log(this.state.progressTime)
 
         if (playbackStatus.didJustFinish) {
+          this.
           // The player has just finished playing and will stop.
           this._nextVideo()
         }
