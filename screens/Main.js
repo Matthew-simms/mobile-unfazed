@@ -247,7 +247,7 @@ _getMMSSFromMillis(millis) {
         // console.log(this.state.progressTime)
 
         if (playbackStatus.didJustFinish) {
-          this.
+
           // The player has just finished playing and will stop.
           this._nextVideo()
         }
