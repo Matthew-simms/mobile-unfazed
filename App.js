@@ -1,12 +1,16 @@
 import React from 'react'
+import { Provider } from 'react-redux';
+import ReduxThunk from 'redux-thunk';
+import { createStore, applyMiddleware } from 'redux';
 import RootNavigation from './navigation/RootNavigation';
-import { Font, AppLoading } from 'expo'
+import { Font, AppLoading } from 'expo';
+import reducers from './reducers';
 
 export default class App extends React.Component {
   state = {
     isReady: false,
   };
-  
+
     // GET assets then load before app renders
     async _loadFontsAsync() {
       try {
@@ -36,7 +40,9 @@ export default class App extends React.Component {
     }
 
       return (
+        <Provider store={createStore(reducers, {}, applyMiddleware(ReduxThunk))}>
           <RootNavigation />
+        </Provider>
       );
     }
   }
