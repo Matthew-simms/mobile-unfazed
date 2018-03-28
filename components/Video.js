@@ -15,7 +15,8 @@ class VideoComponent extends React.Component{
     this.state = {
       location: null,
       errorMessage: null,
-      isSending: false
+      isSending: false,
+      playVideo: true
     };
   }
 
@@ -51,7 +52,6 @@ class VideoComponent extends React.Component{
   }
 
   postVideo = () => {
-    this.props.startUniversalLoading();
     const { location } = this.state;
     console.log(location);
 
@@ -104,7 +104,7 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientId = getRandomArbitrary(7000, 1000000);
           response.body.postResponse.clientDate = new Date();
           response.body.postResponse.clientEventId = event.eventId;
-          const transcodeVideo = await axios.get('http://192.168.8.101:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
+          const transcodeVideo = await axios.get('http://192.168.8.102:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
           console.log(transcodeVideo);
           if (transcodeVideo.data.status === 'success') {
             this.props.stopUniversalLoading();
@@ -117,7 +117,7 @@ class VideoComponent extends React.Component{
         });
     }
 
-    //puts in discriminately arr[3].place.location.longitude = location.coords.longitude;
+    // puts in discriminately arr[3].place.location.longitude = location.coords.longitude;
     //arr[3].place.location.latitude = location.coords.latitude;
 
 
@@ -127,6 +127,7 @@ class VideoComponent extends React.Component{
         const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
         console.log(result);
         if (result) {
+          this.props.startUniversalLoading();
           postToEvent(arr[i]);
         }
       }
@@ -144,7 +145,8 @@ class VideoComponent extends React.Component{
       );
     }
 
-    const uri = this.props.camDataReducer.uri;
+    let { playVideo } = this.state;
+    let uri = this.props.camDataReducer.uri;
     const closeIcon = (<Icon name="md-close" size={50} color="white" />)
 
     return (
@@ -155,7 +157,7 @@ class VideoComponent extends React.Component{
           volume={0}
           isMuted={false}
           resizeMode="cover"
-          shouldPlay
+          shouldPlay={playVideo}
           isLooping
           style={{ width: '100%', height: '100%' }}
         />

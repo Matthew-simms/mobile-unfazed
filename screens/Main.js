@@ -58,6 +58,7 @@ class Main extends React.Component {
       isLoading: true,
       fontLoaded: false,
       bgImgsLoaded: false,
+      playVideo: true,
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
@@ -144,7 +145,7 @@ class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('http://localhost:5000/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('http://192.168.8.102:5000/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -297,6 +298,20 @@ _getMMSSFromMillis(millis) {
       console.log(newDate)
     }
 
+    //To know curent index in Swiper
+    onScrollEnd = (e, state) => {
+      console.log('INDEX IS: ', state.index);
+      if (state.index === 2) {
+        this.setState({
+          playVideo: false
+        });
+      } else if (state.index === 1) {
+        this.setState({
+          playVideo: true
+        })
+      }
+    }
+
 // Camera Record no permissions
     renderNoPermissions() {
       return (
@@ -320,7 +335,7 @@ _getMMSSFromMillis(millis) {
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo} = this.state;
 
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded) {
       return (
@@ -336,6 +351,7 @@ _getMMSSFromMillis(millis) {
       showsPagination={false}
       index={1}
       ref={(swiper) => {this.swiper = swiper;}}
+      onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
          <FlatList
@@ -407,6 +423,7 @@ _getMMSSFromMillis(millis) {
         showsPagination={false}
         index={1}
         ref={(swiper) => {this.swiper = swiper;}}
+
         >
         <View style={this.viewStyle()}>
           <TitleText label="Top" />
@@ -434,15 +451,15 @@ _getMMSSFromMillis(millis) {
           volume={0.0}
           muted={true}
           resizeMode="cover"
-          shouldPlay={true}
+          shouldPlay={playVideo}
           isLooping
           style={styles.VideoContainer}
 
         />
         </TouchableOpacity>
-        { !this.state.isPlaying || this.state.isBuffering ? (
+        { this.state.isBuffering ? (
             <View style={this.viewStyle()}>
-              <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
+              <Spinner visible={true} textContent={'Loading...'} textStyle={{color: '#FFF'}} />
             </View>
           ) : null }
       </View>
