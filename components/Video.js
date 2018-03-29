@@ -104,7 +104,7 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientId = getRandomArbitrary(7000, 1000000);
           response.body.postResponse.clientDate = new Date();
           response.body.postResponse.clientEventId = event.eventId;
-          const transcodeVideo = await axios.get('http://192.168.8.102:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
+          const transcodeVideo = await axios.get('http://192.168.8.100:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
           console.log(transcodeVideo);
           if (transcodeVideo.data.status === 'success') {
             this.props.stopUniversalLoading();
@@ -117,8 +117,8 @@ class VideoComponent extends React.Component{
         });
     }
 
-    // puts in discriminately arr[3].place.location.longitude = location.coords.longitude;
-    //arr[3].place.location.latitude = location.coords.latitude;
+    arr[3].place.location.longitude = location.coords.longitude;
+    arr[3].place.location.latitude = location.coords.latitude;
 
 
     for (var i = 0; i < arr.length; i++) {

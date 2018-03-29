@@ -156,7 +156,7 @@ class CameraComponent extends React.Component {
     }, 90000);
   }
 
-  toggleCamera = async () => {
+  startCamera = async () => {
     const { bC } = this.state;
     if(bC === 'white') {
       this.setState({
@@ -169,6 +169,13 @@ class CameraComponent extends React.Component {
         console.log(data);
         this.props.storeCamData(data);
       });
+    }
+  }
+
+  stopCamera = async () => {
+    const { bC } = this.state;
+    if(bC === 'white') {   
+      //Do nothing, not recording
     } else {
       this.camera.stopRecording();
       this.setState({
@@ -225,9 +232,14 @@ class CameraComponent extends React.Component {
                 alignSelf: 'flex-end',
                 alignItems: 'center',
                }}
-              onPress={() => {
-                this.toggleCamera();
-              }}>
+              onLongPress={() => {
+                this.startCamera();
+              }}
+              onPressOut={() => {
+                this.stopCamera();
+                console.log('onPressOut')
+              }}
+             >
               <View
                 style={{
                   borderWidth: 4,
