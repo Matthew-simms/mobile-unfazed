@@ -9,12 +9,14 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress'
 import GalleryScreen from '../components/GalleryScreen';
 import RootNavigation from '../navigation/RootNavigation';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { connect } from 'react-redux';
 
+import { storeEventData } from '../actions';
 import CameraC from './Camera';
 
 // Detect screen size to calculate row height
 const screen = Dimensions.get('window');
-const { width, height } = Dimensions.get('window'); 
+const { width, height } = Dimensions.get('window');
 
 class TitleText extends React.Component {
   render() {
@@ -26,9 +28,11 @@ class TitleText extends React.Component {
   }
 }
 
-export default class Main extends React.Component {
+class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
+
+    this.refreshMainC = this.refreshMainC.bind(this);
 
     // app state
     this.state = {
@@ -54,6 +58,7 @@ export default class Main extends React.Component {
       isLoading: true,
       fontLoaded: false,
       bgImgsLoaded: false,
+      playVideo: true,
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
@@ -68,7 +73,7 @@ export default class Main extends React.Component {
     FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
       console.log(e, 'Directory exists');
     });
-    /* 
+    /*
      * http://localhost:5000/v1/venues/search/uk?q=London&o=2
      * onLoad pass location data, GET first item(venue) in db with most videos
      * then pass eventId, GET videos in that event, load latest posted video
@@ -77,7 +82,7 @@ export default class Main extends React.Component {
       const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
       console.log(allEventsRequest.data.payload)
       this.noVenueData(allEventsRequest)
-  
+
       // console.log(venueRequest.data.payload[0].place.name)
       const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
       .catch(function(error) {
@@ -90,7 +95,7 @@ export default class Main extends React.Component {
     // GET upcoming events in London
     const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
     .catch(function(error) {
-      console.log(error.message);
+      console.log('MEE:', error.message);
         throw error;
       })
     console.log(upcomingEventsRequest.data.payload)
@@ -116,7 +121,7 @@ export default class Main extends React.Component {
     arr.push(events)
     // console.log(arr)
     await Promise.all(events.map(async arr => {
-      console.log(arr.videoCount); 
+      console.log(arr.videoCount);
       let videoCount = arr.videoCount
       if (videoCount >= 8) {
         videoCount = 8
@@ -132,7 +137,7 @@ export default class Main extends React.Component {
       venue: arr,
     }))
     // console.log(this.state.data);
-    await this.getEventBgImg()
+    await this.getEventBgImg();
   }
 
   // GET list background images for each event add to eventsOn array
@@ -140,7 +145,7 @@ export default class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('http://localhost:5000/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('http://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -151,6 +156,7 @@ export default class Main extends React.Component {
       venue: arr,
       data: arr.concat(this.state.upcomingEvents)
     }))
+    this.props.storeEventData(arr.concat(this.state.upcomingEvents));
     console.log(this.state.venue)
     console.log(this.state.data)
   }
@@ -176,7 +182,7 @@ noVideoData(videoRequest) {
    return;
  }
 }
-  
+
 // Controls view
 _getMMSSFromMillis(millis) {
   const totalSeconds = millis / 1000;
@@ -199,7 +205,7 @@ _getMMSSFromMillis(millis) {
   // Navigate back to Home video screen
   this.swiper.scrollBy(1)
   // pass row event id data
-  this.setState(prevState => ({ 
+  this.setState(prevState => ({
     eventId: rowData.eventId,
     currentVenue: rowData,
     // selectedVenueIndex: rowData.index
@@ -233,7 +239,7 @@ _getMMSSFromMillis(millis) {
     _playbackCallback(playbackStatus) {
       if (playbackStatus.isLoaded) {
         this.setState({
-          playbackInstancePosition:  Math.round(((playbackStatus.positionMillis / 1000) % 60)), 
+          playbackInstancePosition:  Math.round(((playbackStatus.positionMillis / 1000) % 60)),
           playbackInstanceDuration:  Math.round(((playbackStatus.durationMillis / 1000) % 60)),
           shouldPlay: playbackStatus.shouldPlay,
           isPlaying: playbackStatus.isPlaying,
@@ -247,7 +253,7 @@ _getMMSSFromMillis(millis) {
         // console.log(this.state.progressTime)
 
         if (playbackStatus.didJustFinish) {
-
+          //.
           // The player has just finished playing and will stop.
           this._nextVideo()
         }
@@ -267,6 +273,10 @@ _getMMSSFromMillis(millis) {
 
     // Map array and show UI faces in render
     UiPrinter(array) {
+      //console.log(array);
+      // <View style={styles.imageRow}>
+      //   {this.UiPrinter(rowData.uiFaces)}
+      // </View>
       return array.map(function(images, index) {
         // don't put your key as index, choose other unique values as your key.
         return <Image
@@ -285,7 +295,21 @@ _getMMSSFromMillis(millis) {
     _convertUTCDateToLocalDate(UTCdate) {
       var newDate = new Date(UTCdate);
       return newDate;
-      console.log(newDate)  
+      console.log(newDate)
+    }
+
+    //To know curent index in Swiper
+    onScrollEnd = (e, state) => {
+      console.log('INDEX IS: ', state.index);
+      if (state.index === 2 || state.index === 0) {
+        this.setState({
+          playVideo: false
+        });
+      } else if (state.index === 1) {
+        this.setState({
+          playVideo: true
+        })
+      }
     }
 
 // Camera Record no permissions
@@ -298,15 +322,20 @@ _getMMSSFromMillis(millis) {
         </View>
       );
     }
-      
+
+  async refreshMainC() {
+    console.log('Called to refresh');
+    await this.componentDidMount();
+  }
+
   render() {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
-    ? <CameraC />
+    ? <CameraC refreshMainC={this.refreshMainC} />
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission} = this.state;
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo} = this.state;
 
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded) {
       return (
@@ -322,13 +351,14 @@ _getMMSSFromMillis(millis) {
       showsPagination={false}
       index={1}
       ref={(swiper) => {this.swiper = swiper;}}
+      onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
          <FlatList
           data={this.state.data}
           renderItem={rowParameter =>  {
           const rowData = rowParameter.item
-         // console.log('rowData'+ rowData)
+          console.log('rowData'+ JSON.stringify(rowData))
             return (
               <TouchableOpacity
               // Pass row style
@@ -339,7 +369,7 @@ _getMMSSFromMillis(millis) {
               activeOpacity={0.7}
             >
               { !rowData.upcomingEvent
-                ? <ImageBackground source={{uri: this._handleRandomIndex(rowData.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }> 
+                ? <ImageBackground source={{uri: this._handleRandomIndex(rowData.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }>
                     <LinearGradient
                           colors={ this._handleRandomIndex(this.state.listColor) }
                           start={[0.1,0.1]}
@@ -348,15 +378,12 @@ _getMMSSFromMillis(millis) {
                         {/* Background */}
                         <View style={ styles.listBackground }>
                           {/* onNow */}
-                          <Text style={[styles.text, styles.red]}>On Now</Text> 
+                          <Text style={[styles.text, styles.red]}>On Now</Text>
                           {/* Title */}
                           <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
                           {/* Venue Name */}
-                          <Text style={[styles.text]}>@ {rowData.place.name}</Text> 
+                          <Text style={[styles.text]}>@ {rowData.place.name}</Text>
                         </View>
-                        <View style={styles.imageRow}>
-                          {this.UiPrinter(rowData.uiFaces)}
-                        </View> 
                         <Button
                           onPress={this._onRowPress.bind(this, rowData)}
                           title={ 'Watch' }
@@ -364,7 +391,7 @@ _getMMSSFromMillis(millis) {
                           buttonStyle={styles.button}
                         />
                      </LinearGradient>
-                   </ImageBackground> 
+                   </ImageBackground>
                 : <ImageBackground source={{uri: rowData.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
                     <View style={ styles.bgContainer }>
                       {/* Background */}
@@ -374,14 +401,14 @@ _getMMSSFromMillis(millis) {
                         {/* Title */}
                         <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
                         {/* Venue Name */}
-                        <Text style={[styles.text]}>@ {rowData.place.name} { [this._convertUTCDateToLocalDate(rowData.startTime).toString()] }</Text> 
-                      </View> 
+                        <Text style={[styles.text]}>@ {rowData.place.name} { [this._convertUTCDateToLocalDate(rowData.startTime).toString()] }</Text>
+                      </View>
                         <Button
                           title={ 'Watch most recent gig' }
                           rounded
                           buttonStyle={styles.button}
                         />
-                    </View> 
+                    </View>
                   </ImageBackground>
               }
             </TouchableOpacity>
@@ -396,6 +423,7 @@ _getMMSSFromMillis(millis) {
         showsPagination={false}
         index={1}
         ref={(swiper) => {this.swiper = swiper;}}
+
         >
         <View style={this.viewStyle()}>
           <TitleText label="Top" />
@@ -414,7 +442,8 @@ _getMMSSFromMillis(millis) {
             fill={100}
             tintColor="#00e0ff"
             onAnimationComplete={() => console.log('onAnimationComplete')}
-            backgroundColor="#3d5875" /> */}
+            backgroundColor="#3d5875" />
+            */}
           <Video
           source={{ uri: videos[selectedVidIndex].instaVideoLink }}
           onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
@@ -422,15 +451,15 @@ _getMMSSFromMillis(millis) {
           volume={0.0}
           muted={true}
           resizeMode="cover"
-          shouldPlay
+          shouldPlay={playVideo}
           isLooping
           style={styles.VideoContainer}
 
         />
         </TouchableOpacity>
-        { !this.state.isPlaying || this.state.isBuffering ? ( 
+        { this.state.isBuffering ? (
             <View style={this.viewStyle()}>
-              <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
+              <Spinner visible={true} textContent={'Loading...'} textStyle={{color: '#FFF'}} />
             </View>
           ) : null }
       </View>
@@ -446,18 +475,20 @@ _getMMSSFromMillis(millis) {
             {/* Title */}
             <Text style={[styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
               {/* Venue Name */}
-              <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
+              <Text style={[styles.text]}>{currentVenue.place.name}</Text>
           </View>
             <Text style={[styles.text]}>{currentVenue.description}</Text>
         </LinearGradient>
         </ScrollView>
         </View>
-      </Swiper>        
+      </Swiper>
         <View style={styles.camContainer}>{content}</View>
     </Swiper>
     )
    }
   }
+
+export default connect(null, {storeEventData})(Main);
 
 const styles = StyleSheet.create({
   container: {
@@ -467,6 +498,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  camContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
   VideoContainer: {
     flex: 1,
@@ -480,7 +515,7 @@ const styles = StyleSheet.create({
   row: {
     padding: 5  ,                   // Add padding at the bottom
   },
-  // Background 
+  // Background
   listBackground: {
     height: screen.height / 5,          // Divide screen height by 3
   },
@@ -533,7 +568,7 @@ const styles = StyleSheet.create({
     height: 34,
     width: 34,
     borderRadius: 17,
-    marginLeft: -10,  
+    marginLeft: -10,
   },
   // UI faces row
   imageRow: {
