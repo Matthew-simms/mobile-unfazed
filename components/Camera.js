@@ -61,80 +61,80 @@ class CameraComponent extends React.Component {
   }
 
   // Camera
-  getRatios = async () => {
-    const ratios = await this.camera.getSupportedRatios();
-    return ratios;
-  };
+  // getRatios = async () => {
+  //   const ratios = await this.camera.getSupportedRatios();
+  //   return ratios;
+  // };
 
-  toggleView() {
-    this.setState({
-      showGallery: !this.state.showGallery,
-    });
-  }
+  // toggleView() {
+  //   this.setState({
+  //     showGallery: !this.state.showGallery,
+  //   });
+  // }
 
-  toggleFacing() {
-    this.setState({
-      type: this.state.type === 'back' ? 'front' : 'back',
-    });
-  }
+  // toggleFacing() {
+  //   this.setState({
+  //     type: this.state.type === 'back' ? 'front' : 'back',
+  //   });
+  // }
 
-  toggleFlash() {
-    this.setState({
-      flash: flashModeOrder[this.state.flash],
-    });
-  }
+  // toggleFlash() {
+  //   this.setState({
+  //     flash: flashModeOrder[this.state.flash],
+  //   });
+  // }
 
-  setRatio(ratio) {
-    this.setState({
-      ratio,
-    });
-  }
+  // setRatio(ratio) {
+  //   this.setState({
+  //     ratio,
+  //   });
+  // }
 
-  toggleWB() {
-    this.setState({
-      whiteBalance: wbOrder[this.state.whiteBalance],
-    });
-  }
+  // toggleWB() {
+  //   this.setState({
+  //     whiteBalance: wbOrder[this.state.whiteBalance],
+  //   });
+  // }
 
-  toggleFocus() {
-    this.setState({
-      autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
-    });
-  }
+  // toggleFocus() {
+  //   this.setState({
+  //     autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
+  //   });
+  // }
 
-  zoomOut() {
-    this.setState({
-      zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
-    });
-  }
+  // zoomOut() {
+  //   this.setState({
+  //     zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
+  //   });
+  // }
 
-  zoomIn() {
-    this.setState({
-      zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
-    });
-  }
+  // zoomIn() {
+  //   this.setState({
+  //     zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
+  //   });
+  // }
 
-  setFocusDepth(depth) {
-    this.setState({
-      depth,
-    });
-  }
+  // setFocusDepth(depth) {
+  //   this.setState({
+  //     depth,
+  //   });
+  // }
 
-  takePicture = async function() {
-    if (this.camera) {
-      this.camera.takePictureAsync().then(data => {
-        FileSystem.moveAsync({
-          from: data.uri,
-          to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
-        }).then(() => {
-          this.setState({
-            photoId: this.state.photoId + 1,
-          });
-          Vibration.vibrate();
-        });
-      });
-    }
-  };
+  // takePicture = async function() {
+  //   if (this.camera) {
+  //     this.camera.takePictureAsync().then(data => {
+  //       FileSystem.moveAsync({
+  //         from: data.uri,
+  //         to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
+  //       }).then(() => {
+  //         this.setState({
+  //           photoId: this.state.photoId + 1,
+  //         });
+  //         Vibration.vibrate();
+  //       });
+  //     });
+  //   }
+  // };
 
   startCounting() {
     setTimeout(() => {

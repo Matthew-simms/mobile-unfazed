@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "eslint-config-rallycoding": "^3.2.0",
-    "jest-expo": "23.0.0",
+    "jest-expo": "25.0.0",
     "react-devtools": "^3.0.0",
     "react-native-scripts": "1.8.1",
     "react-test-renderer": "16.0.0"
@@ -22,11 +22,11 @@
     "preset": "jest-expo"
   },
   "dependencies": { 
-    "expo": "^23.0.4",
+    "expo": "^25.0.0",
     "firebase": "^4.11.0",
     "randomcolor": "^0.5.3",
-    "react": "16.0.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-23.0.0.tar.gz",
+    "react": "16.2.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-25.0.0.tar.gz",
     "react-native-app-intro-slider": "^0.2.4",
     "react-native-aws3": "0.0.8",
     "react-native-circular-progress": "^0.1.2",
@@ -35,7 +35,7 @@
     "react-native-loading-spinner-overlay": "^0.5.2",
     "react-native-swiper": "^1.5.13",
     "react-native-vector-icons": "^4.5.0",
-    "react-navigation": "^1.5.2",
+    "react-navigation": "^1.0.0-beta.27",
     "react-redux": "^5.0.7",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0"

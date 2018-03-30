@@ -97,22 +97,31 @@ class VideoComponent extends React.Component{
         if (response.status !== 201) {
             console.log(response);
         } else {
+          console.log(response);
           console.log(response.body);
           function getRandomArbitrary(min, max) {
             return Math.random() * (max - min) + min;
           }
-          response.body.postResponse.clientId = getRandomArbitrary(7000, 1000000);
-          response.body.postResponse.clientDate = new Date();
-          response.body.postResponse.clientEventId = event.eventId;
-          const transcodeVideo = await axios.get('http://192.168.8.100:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
-          console.log(transcodeVideo);
-          if (transcodeVideo.data.status === 'success') {
+          if (response.status == 201) {
             this.props.stopUniversalLoading();
             this.props.refreshMainC();
             setTimeout(() => {
               this.props.camOrVid('Camera');
             }, 3000);
           }
+          response.body.postResponse.clientId = getRandomArbitrary(7000, 1000000);
+          response.body.postResponse.clientDate = new Date();
+          response.body.postResponse.clientEventId = event.eventId;
+          const transcodeVideo = await axios.get('http://192.168.1.127:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
+          console.log(transcodeVideo);
+         
+          // if (transcodeVideo.data.status === 'success') {
+          //   this.props.stopUniversalLoading();
+          //   this.props.refreshMainC();
+          //   setTimeout(() => {
+          //     this.props.camOrVid('Camera');
+          //   }, 3000);
+          // }
         }
         });
     }
@@ -146,6 +155,7 @@ class VideoComponent extends React.Component{
     }
 
     let { playVideo } = this.state;
+    console.log(playVideo)
     let uri = this.props.camDataReducer.uri;
     const closeIcon = (<Icon name="md-close" size={50} color="white" />)
 

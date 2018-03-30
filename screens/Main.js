@@ -145,7 +145,7 @@ class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('http://192.168.8.100:5000/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('http://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -301,7 +301,7 @@ _getMMSSFromMillis(millis) {
     //To know curent index in Swiper
     onScrollEnd = (e, state) => {
       console.log('INDEX IS: ', state.index);
-      if (state.index === 2) {
+      if (state.index === 2 || state.index === 0) {
         this.setState({
           playVideo: false
         });
