@@ -107,7 +107,7 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientDate = new Date();
           response.body.postResponse.clientEventId = event.eventId;
           response.body.postResponse.clientEventId = this.props.UserData.username
-          const transcodeVideo = await axios.get('http://192.168.1.127:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
+          const transcodeVideo = await axios.get('http://10.57.31.193:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
           console.log(transcodeVideo);
           if (transcodeVideo.data.status === 'success') {
             this.props.stopUniversalLoading();
