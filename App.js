@@ -5,6 +5,11 @@ import { createStore, applyMiddleware } from 'redux';
 import RootNavigation from './navigation/RootNavigation';
 import { Font, AppLoading } from 'expo';
 import reducers from './reducers';
+import cacheAssetsAsync from './helpers/cachedAssetAsync'
+import { Constants } from 'expo'
+
+
+console.log(Constants.isDevice) 
 
 export default class App extends React.Component {
   state = {
@@ -12,37 +17,52 @@ export default class App extends React.Component {
   };
 
     // GET assets then load before app renders
-    async _loadFontsAsync() {
+    async _loadAssetsAsync() {
       try {
-        await Font.loadAsync({
-          'katanas-edge': require('./assets/fonts/katanas-edge.ttf'),
+        await cacheAssetsAsync({
+          images: [require('./assets/images/nav-tute.png')],
+          fonts: [
+            { 'katanas-edge': require('./assets/fonts/katanas-edge.ttf') },
+          ],
         });
       } catch (e) {
-        console.warn(
-          'There was an error caching assets (see: main.js), perhaps due to a ' +
-            'network timeout, so we skipped caching. Reload the app to try again.'
+        console.log({ e });
+      } 
+    }
+
+    _handleLoadingError = error => {
+      // In this case, you might want to report the error to your error
+      // reporting service, for example Sentry
+      console.warn(error);
+    };
+  
+    _handleFinishLoading = () => {
+      this.setState({ fontLoaded: true, isReady: true  });
+    };
+  
+
+    render() {
+      if ( !this.state.isReady ) {
+        return (
+          <AppLoading
+          startAsync={this._loadAssetsAsync}
+          onError={this._handleLoadingError}
+          onFinish={this._handleFinishLoading}
+          />
         );
-        console.log(e.message);
-      } finally {
-        this.setState({ fontLoaded: true });
       }
-    }
 
-  render() {
-    if ( !this.state.isReady ) {
+      if (!Constants.isDevice) {
+      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
       return (
-        <AppLoading
-          startAsync={this._loadFontsAsync}
-          onFinish={() => this.setState({ isReady: true })}
-          onError={console.warn}
-        />
-      );
-    }
-
+        <Provider store={createStore(reducers, {}, composeEnhancers(applyMiddleware(ReduxThunk)))}>
+          <RootNavigation />
+        </Provider>
+      )}
       return (
         <Provider store={createStore(reducers, {}, applyMiddleware(ReduxThunk))}>
           <RootNavigation />
         </Provider>
-      );
+      )
     }
   }
