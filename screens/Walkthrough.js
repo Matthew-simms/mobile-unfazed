@@ -1,8 +1,10 @@
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo';
 import AppIntroSlider from 'react-native-app-intro-slider';
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   mainContent: {
@@ -79,17 +81,54 @@ export default class Walk extends React.Component {
 
   render() {
     return (
-      <AppIntroSlider
-        slides={slides}
-        renderItem={this._renderItem}
-        bottomButton
-        showPrevButton
-        showSkipButton
-        onDone={(e) => this._handleDone(e, this)}
-        // hideNextButton
-        // hideDoneButton
-        onSkip={() => console.log("skipped")}
-      />
+      <View style={{
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }}>
+        <View style={{   
+                    position: 'absolute', 
+                      zIndex: 2,
+                      height: 80,
+                      left: 0, 
+                      top: height - 80, 
+                      width: width,
+                      padding: 10,
+                      flexDirection: 'row', }}>
+          <TouchableOpacity
+          onPress={(e) => this._handleDone(e, this)} >
+            <View style={{
+                        width: width/2 -10,
+                        zIndex: 3,
+                        marginRight: 5,
+                        flex: 1,
+                        borderWidth: 2,
+                        borderColor: 'white',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        }}>
+            <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Signup</Text>
+            </View>
+          </TouchableOpacity>
+          <View style={{backgroundColor: 'green',     
+                      width: width/2 -20,
+                      zIndex: 3,
+                      marginLeft: 5,
+                       }}>
+          </View>
+      </View>
+        <AppIntroSlider
+          slides={slides}
+          renderItem={this._renderItem}
+          bottomButton
+          hidePrevButton
+          hideSkipButton
+          onDone={(e) => this._handleDone(e, this)}
+          hideNextButton
+          hideDoneButton
+          onSkip={() => console.log("skipped")}
+        />
+      </View>
     );
   }
 }
