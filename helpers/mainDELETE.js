@@ -66,70 +66,70 @@ class Main extends React.Component {
     }
   }
 
-  async componentDidMount() {
+async componentDidMount() {
 
-    //firebase current user attributes DEBUG
-    var user = firebase.auth().currentUser;
-    var name, email, photoUrl, uid, emailVerified;
-    
-    if (user != null) {
-      name = user.displayName;
-      email = user.email;
-      photoUrl = user.photoURL;
-      emailVerified = user.emailVerified;
-      uid = user.uid;
-      console.log(name)
-      console.log(uid)
-      console.log(email)
-      console.log(photoUrl)
+//firebase current user attributes DEBUG
+var user = firebase.auth().currentUser;
+var name, email, photoUrl, uid, emailVerified;
+
+if (user != null) {
+  name = user.displayName;
+  email = user.email;
+  photoUrl = user.photoURL;
+  emailVerified = user.emailVerified;
+  uid = user.uid;
+  console.log(name)
+  console.log(uid)
+  console.log(email)
+  console.log(photoUrl)
+}
+    // Camera Permisisons
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ permissionsGranted: status === 'granted' });
+
+    console.log(this.props.modal)
+    console.log('qqqqqqqqqq')
+    console.log(this.props.userInfo)
+    /*
+     * http://localhost:5000/v1/venues/search/uk?q=London&o=2
+     * onLoad pass location data, GET first item(venue) in db with most videos
+     * then pass eventId, GET videos in that event, load latest posted video
+     */
+      // GET all events currently on in London
+      const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
+      console.log(allEventsRequest.data.payload)
+      this.noVenueData(allEventsRequest)
+
+      // console.log(venueRequest.data.payload[0].place.name)
+      const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
+      .catch(function(error) {
+        console.log(error.message);
+          throw error;
+        })
+      console.log(videoRequest.data.payload[0])
+      this.noVideoData(videoRequest)
+
+    // GET upcoming events in London
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
+    .catch(function(error) {
+      console.log('MEE:', error.message);
+        throw error;
+      })
+    console.log(upcomingEventsRequest.data.payload)
+
+      this.setState({
+        venue:  allEventsRequest.data.payload,
+        currentVenue: allEventsRequest.data.payload[0],
+        videos: videoRequest.data.payload,
+        upcomingEvents : upcomingEventsRequest.data.payload,
+        selectedVenueIndex: 0,
+        selectedVidIndex: 0,
+        vidLink: videoRequest.data.payload[0].instaVideoLink,
+        isVenueLoading: false
+      });
+      console.log(this.state.currentVenue)
+      await this.getUserFaces(allEventsRequest)
     }
-        // Camera Permisisons
-        const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ permissionsGranted: status === 'granted' });
-    
-        console.log(this.props.modal)
-        console.log('qqqqqqqqqq')
-        console.log(this.props.userInfo)
-        /*
-         * http://localhost:5000/v1/venues/search/uk?q=London&o=2
-         * onLoad pass location data, GET first item(venue) in db with most videos
-         * then pass eventId, GET videos in that event, load latest posted video
-         */
-          // GET all events currently on in London
-          const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-          console.log(allEventsRequest.data.payload)
-          this.noVenueData(allEventsRequest)
-    
-          // console.log(venueRequest.data.payload[0].place.name)
-          const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
-          .catch(function(error) {
-            console.log(error.message);
-              throw error;
-            })
-          console.log(videoRequest.data.payload[0])
-          this.noVideoData(videoRequest)
-    
-        // GET upcoming events in London
-        const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
-        .catch(function(error) {
-          console.log('MEE:', error.message);
-            throw error;
-          })
-        console.log(upcomingEventsRequest.data.payload)
-    
-          this.setState({
-            venue:  allEventsRequest.data.payload,
-            currentVenue: allEventsRequest.data.payload[0],
-            videos: videoRequest.data.payload,
-            upcomingEvents : upcomingEventsRequest.data.payload,
-            selectedVenueIndex: 0,
-            selectedVidIndex: 0,
-            vidLink: videoRequest.data.payload[0].instaVideoLink,
-            isVenueLoading: false
-          });
-          console.log(this.state.currentVenue)
-          await this.getUserFaces(allEventsRequest)
-        }
 
   // GET fake user photos from www.uifaces.co/api add to eventsOn array
   async getUserFaces (allEventsRequest)  {
@@ -143,7 +143,8 @@ class Main extends React.Component {
       if (videoCount >= 8) {
         videoCount = 8
       }
-      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
+      const key = '9ac222abb8fa4c2892d3dc469f679b'
+      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random', { headers: { 'X-API-KEY': key } })
       .then((userFaces) => {
         { arr.uiFaces = userFaces.data;}
         })
@@ -162,7 +163,7 @@ class Main extends React.Component {
     let bgImgLen = await this.state.venue[0].length
     console.log(bgImgLen)
     const arr = this.state.venue[0]
-    const bgImgRes = await axios.get('http://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
+    const bgImgRes = await axios.get('http://192.168.8.100:5000/v1/venues/image?q=' + bgImgLen)
     bgImg = bgImgRes.data.payload
     console.log(bgImg)
     arr.forEach(function(itm){
@@ -271,9 +272,10 @@ noVideoData(videoRequest) {
           selectedVidIndex: prevState.selectedVidIndex + 1,
         }))
     }
+   
 
-   // Map array and show UI faces in render
-   UiPrinter(array) {
+  // Map array and show UI faces in render
+  UiPrinter(array) {
     if (array) {
     return array.map(function(images, index) {
       // don't put your key as index, choose other unique values as your key.
@@ -300,7 +302,7 @@ noVideoData(videoRequest) {
     //To know curent index in Swiper
     onScrollEnd = (e, state) => {
       console.log('INDEX IS: ', state.index);
-      if (state.index === 2 || state.index === 0) {
+      if (state.index === 2) {
         this.setState({
           playVideo: false
         });
@@ -310,6 +312,15 @@ noVideoData(videoRequest) {
         })
       }
     }
+
+    signOutUser = async () => {
+      try {
+          await firebase.auth().signOut();
+          navigate('auth');
+      } catch (e) {
+          console.log(e);
+      }
+  }
 
 // Camera Record no permissions
     renderNoPermissions() {
@@ -321,16 +332,6 @@ noVideoData(videoRequest) {
         </View>
       );
     }
-
-
-    signOutUser = async () => {
-      try {
-          await firebase.auth().signOut();
-          navigate('auth');
-      } catch (e) {
-          console.log(e);
-      }
-  }
 
   async refreshMainC() {
     console.log('Called to refresh');
@@ -393,6 +394,9 @@ noVideoData(videoRequest) {
                           {/* Venue Name */}
                           <Text style={[styles.text]}>@ {rowData.place.name}</Text>
                         </View>
+                        <View style={styles.imageRow}>
+                          {this.UiPrinter(rowData.uiFaces)}
+                        </View> 
                         <Button
                           onPress={this._onRowPress.bind(this, rowData)}
                           title={ 'Watch' }
@@ -456,7 +460,7 @@ noVideoData(videoRequest) {
            onPress={(e) => this._nextVideo(e, this)}
            activeOpacity={0.7}
           >
-            <View style={{
+          <View style={{
               flex: 1,
               flexDirection: 'column',
               justifyContent: 'space-between'
@@ -480,46 +484,54 @@ noVideoData(videoRequest) {
               <Text style={[styles.title]}>{currentVenue.eventName}</Text>
               {/* Venue Name */}
               <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
-            </View> 
-          <Video
-          source={{ uri: videos[selectedVidIndex].instaVideoLink }}
-          onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
-          rate={1.0}
-          volume={0.0}
-          muted={true}
-          resizeMode="cover"
-          shouldPlay={playVideo}
-          isLooping
-          style={styles.VideoContainer}
-
-        />
-         </View>
+            </View>               
+            <Video
+              source={{ uri: videos[selectedVidIndex].instaVideoLink }}
+              onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
+              rate={1.0}
+              volume={0.0}
+              muted={true}
+              resizeMode="cover"
+              shouldPlay={playVideo}
+              isLooping
+              style={styles.VideoContainer}/>
+          </View>
         </TouchableOpacity>
-        {/* { this.state.isBuffering ? (
+        {/* { !this.state.isPlaying ? ( 
             <View style={this.viewStyle()}>
-              <Spinner visible={true} textContent={'Loading...'} textStyle={{color: '#FFF'}} />
+              <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
             </View>
           ) : null } */}
       </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>
+
+        {/* Problem here! */}
         <ScrollView>
-          <LinearGradient
-            colors={['#00249b', '#1a0057']}
-            start={[0.1,0.1]}
-            end={[0.5,0.5]}>
-          {/* Background */}
-          <View style={ styles.listBackground }>
+        <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bgImgs[selectedVenueIndex].image_link : currentVenue.upcomingArt[selectedVenueIndex].image_link }} style={ styles.detailsImgBg }>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
+            {/* Background */}
+            <View style={ styles.detailList }>
             {/* Title */}
-            <Text style={[styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+            <Text style={[styles.title, styles.textBgBlue]}>{currentVenue.eventName.toUpperCase()}</Text>
               {/* Venue Name */}
-              <Text style={[styles.text]}>{currentVenue.place.name}</Text>
+            <Text style={[styles.text, styles.darkBlue]}>@ {currentVenue.place.name}</Text>
+
+             <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
+              <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
+              <View style={{flexDirection: 'column'}}>
+                <Text style={[styles.text, styles.blk]}>Currently playing video by</Text> 
+                <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
+              </View>
+            </View> 
+          
+            <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
+            </View>
           </View>
-            <Text style={[styles.text]}>{currentVenue.description}</Text>
-        </LinearGradient>
+        </ImageBackground>
         </ScrollView>
         </View>
-      </Swiper>
+      </Swiper>        
         <View style={styles.camContainer}>{content}</View>
     </Swiper>
     )
@@ -537,10 +549,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  camContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
   VideoContainer: {
     flex: 1,
     backgroundColor: '#fff',
@@ -553,7 +561,7 @@ const styles = StyleSheet.create({
   row: {
     padding: 5  ,                   // Add padding at the bottom
   },
-  // Background
+  // Background 
   listBackground: {
     height: screen.height / 5,          // Divide screen height by 3
   },
@@ -570,6 +578,14 @@ const styles = StyleSheet.create({
   imageBackground: {
     width: screen.width - 10,
   },
+  // details image
+  detailsImgBg:  {
+    width: width
+  },
+  detailList: {
+    flex:1,
+    padding: 20,
+  },
   // Background image upcoming events
   imageBackgroundUpcoming: {
     height: screen.height / 2,          // Divide screen height by 6
@@ -583,14 +599,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',     // No background
     fontFamily: 'Avenir',               // Change default font
   },
+  // black
+  blk: {
+    color: 'black',                      // Black text color
+  },
+  darkBlue: {
+    color: 'blue'
+  },
   // red color
   red: {
     color: '#FF0000'
   },
-  // Movie title
+  // title
   title: {
     fontSize: 22,                       // Bigger font size
     fontFamily: 'katanas-edge',
+    color: '#fff'
+  },
+  // Background color text
+  textBgBlue: {
+    backgroundColor: 'blue',
+    padding: 10,
+    flexWrap: 'wrap'
   },
   // Rating row
   rating: {
@@ -606,12 +636,18 @@ const styles = StyleSheet.create({
     height: 34,
     width: 34,
     borderRadius: 17,
-    marginLeft: -10,
+    marginLeft: -10,  
   },
   // UI faces row
   imageRow: {
     flexDirection: 'row',
     paddingBottom: 10,
+  },
+  circleProgress: {
+    alignSelf: 'flex-end',
+    marginTop: -5,
+    position: 'absolute',
+    zIndex: 2,
   },
   }
 );
