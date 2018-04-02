@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
 import { Button } from 'react-native-elements'
-import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video } from 'expo'
+import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -66,24 +66,49 @@ class Main extends React.Component {
     }
   }
   
+  registerForPushNotificationsAsync = async (currentUser) => {
+    const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    let finalStatus = existingStatus;
+
+    // only ask if permissions have not already been determined, because
+    // iOS won't necessarily prompt the user a second time.
+    if (existingStatus !== 'granted') {
+        // Android remote notification permissions are granted during the app
+        // install, so this will only ask on iOS
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+        finalStatus = status;
+    }
+
+    // Stop here if the user did not grant permissions
+    if (finalStatus !== 'granted') {
+        return;
+    }
+
+    // Get the token that uniquely identifies this device
+    let token = await Notifications.getExpoPushTokenAsync();
+
+    // POST the token to our backend so we can use it to send pushes from there
+    var updates = {}
+    updates['/expoToken'] = token
+    await firebase.database().ref('/users/' + currentUser.uid).update(updates)
+    //call the push notification 
+}
 
   async componentDidMount() {
 
-    //firebase current user attributes DEBUG
-    // var user = firebase.auth().currentUser;
-    // var name, email, photoUrl, uid, emailVerified;
-    
-    // if (user != null) {
-    //   name = user.displayName;
-    //   email = user.email;
-    //   photoUrl = user.photoURL;
-    //   emailVerified = user.emailVerified;
-    //   uid = user.uid;
-    //   console.log(name)
-    //   console.log(uid)
-    //   console.log(email)
-    //   console.log(photoUrl)
-    // }
+    var currentUser
+    var that = this
+    listener = firebase.auth().onAuthStateChanged(function (user) {
+        if (user != null) {
+
+            currentUser = user
+
+            that.registerForPushNotificationsAsync(currentUser)
+        }
+
+        listener();
+
+    });
         // Camera Permisisons
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({ permissionsGranted: status === 'granted' });
