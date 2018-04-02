@@ -509,22 +509,30 @@ noVideoData(videoRequest) {
         {/* Event Details View */}
         <View style={this.viewStyle()}>
         <ScrollView>
-          <LinearGradient
-            colors={['#00249b', '#1a0057']}
-            start={[0.1,0.1]}
-            end={[0.5,0.5]}>
-          {/* Background */}
-          <View style={ styles.listBackground }>
+        <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bgImgs[selectedVenueIndex].image_link : currentVenue.upcomingArt[selectedVenueIndex].image_link }} style={ styles.detailsImgBg }>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
+            {/* Background */}
+            <View style={ styles.detailList }>
             {/* Title */}
-            <Text style={[styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+            <Text style={[styles.title, styles.textBgBlue]}>{currentVenue.eventName.toUpperCase()}</Text>
               {/* Venue Name */}
-              <Text style={[styles.text]}>{currentVenue.place.name}</Text>
+            <Text style={[styles.text, styles.darkBlue]}>@ {currentVenue.place.name}</Text>
+
+             <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
+              <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
+              <View style={{flexDirection: 'column'}}>
+                <Text style={[styles.text, styles.blk]}>Currently playing video by</Text> 
+                <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
+              </View>
+            </View> 
+          
+            <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
+            </View>
           </View>
-            <Text style={[styles.text]}>{currentVenue.description}</Text>
-        </LinearGradient>
+        </ImageBackground>
         </ScrollView>
         </View>
-      </Swiper>
+      </Swiper>        
         <View style={styles.camContainer}>{content}</View>
     </Swiper>
     )
@@ -563,7 +571,7 @@ const styles = StyleSheet.create({
   row: {
     padding: 5  ,                   // Add padding at the bottom
   },
-  // Background
+  // Background 
   listBackground: {
     height: screen.height / 5,          // Divide screen height by 3
   },
@@ -580,6 +588,14 @@ const styles = StyleSheet.create({
   imageBackground: {
     width: screen.width - 10,
   },
+  // details image
+  detailsImgBg:  {
+    width: width
+  },
+  detailList: {
+    flex:1,
+    padding: 20,
+  },
   // Background image upcoming events
   imageBackgroundUpcoming: {
     height: screen.height / 2,          // Divide screen height by 6
@@ -593,14 +609,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',     // No background
     fontFamily: 'Avenir',               // Change default font
   },
+  // black
+  blk: {
+    color: 'black',                      // Black text color
+  },
+  darkBlue: {
+    color: 'blue'
+  },
   // red color
   red: {
     color: '#FF0000'
   },
-  // Movie title
+  // title
   title: {
     fontSize: 22,                       // Bigger font size
     fontFamily: 'katanas-edge',
+    color: '#fff'
+  },
+  // Background color text
+  textBgBlue: {
+    backgroundColor: 'blue',
+    padding: 10,
+    flexWrap: 'wrap'
   },
   // Rating row
   rating: {
@@ -616,12 +646,18 @@ const styles = StyleSheet.create({
     height: 34,
     width: 34,
     borderRadius: 17,
-    marginLeft: -10,
+    marginLeft: -10,  
   },
   // UI faces row
   imageRow: {
     flexDirection: 'row',
     paddingBottom: 10,
+  },
+  circleProgress: {
+    alignSelf: 'flex-end',
+    marginTop: -5,
+    position: 'absolute',
+    zIndex: 2,
   },
   }
 );
