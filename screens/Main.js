@@ -65,24 +65,25 @@ class Main extends React.Component {
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
     }
   }
+  
 
   async componentDidMount() {
 
     //firebase current user attributes DEBUG
-    var user = firebase.auth().currentUser;
-    var name, email, photoUrl, uid, emailVerified;
+    // var user = firebase.auth().currentUser;
+    // var name, email, photoUrl, uid, emailVerified;
     
-    if (user != null) {
-      name = user.displayName;
-      email = user.email;
-      photoUrl = user.photoURL;
-      emailVerified = user.emailVerified;
-      uid = user.uid;
-      console.log(name)
-      console.log(uid)
-      console.log(email)
-      console.log(photoUrl)
-    }
+    // if (user != null) {
+    //   name = user.displayName;
+    //   email = user.email;
+    //   photoUrl = user.photoURL;
+    //   emailVerified = user.emailVerified;
+    //   uid = user.uid;
+    //   console.log(name)
+    //   console.log(uid)
+    //   console.log(email)
+    //   console.log(photoUrl)
+    // }
         // Camera Permisisons
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({ permissionsGranted: status === 'granted' });

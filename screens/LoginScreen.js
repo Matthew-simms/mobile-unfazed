@@ -48,15 +48,37 @@ class auth extends React.Component {
 
     }
 
+    // firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password).then(function(authData){
+    //     this.writeUserData(authData.uid, users_nickname);
+    //   }).catch(function(error){
+    //     //bad
+    //   });
+    
+    writeUserData(uid, name) {
+        // uid can also come from let userId = firebaseApp.auth().currentUser.uid;
+        firebase.database().ref('users/' + uid + '/').set({
+            nickname: name,
+        });
+      }
+
     onSignUpPress() {
         this.setState({ error: '', loading: true });
         const { email, password, userName } = this.state;
-        
+
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((user) => {
+                // console.log('USERRR',user)
                 this.setState({ error: '', loading: false });
                 // this.props.navigation.navigate('Main');
                 this.props.onSignUp(this.state.userName)
+                // add user parent of uid, email and username 
+                if (user) {
+                    firebase.database().ref("users").child(user.uid).set({
+                        email: user.email,
+                        uid : user.uid,
+                        username: this.state.userName
+                    })
+                } 
                 return user.updateProfile({displayName: userName})
             })
             .catch(() => {
