@@ -5,7 +5,7 @@ import Main from './Main';
 import { StackNavigator } from 'react-navigation';
 import { FormLabel, FormInput, Button } from 'react-native-elements'
 import { connect } from 'react-redux';
-import { login, loginFb } from '../actions';
+import { login, loginFb, signup } from '../actions';
 
 firebase.initializeApp({
         apiKey: "AIzaSyAh5TKxXzav7bYBvyO9dKQnTtvKMxjE0C0",
@@ -54,8 +54,9 @@ class auth extends React.Component {
         
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((user) => {
-                // this.setState({ error: '', loading: false });
+                this.setState({ error: '', loading: false });
                 // this.props.navigation.navigate('Main');
+                this.props.onSignUp(this.state.userName)
                 return user.updateProfile({displayName: userName})
             })
             .catch(() => {

@@ -443,7 +443,7 @@ noVideoData(videoRequest) {
           </View>
         </View>
         <View style={this.viewStyle()}>
-        { this.props.modal 
+        { this.props.UserData.modal 
            ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)'}}>
                 <Image source={ require('../assets/images/nav-tute.png') } />
                 <Text style={[styles.text]}>MODAL PLACEHOLDER FOR NAV GUIDE</Text> 
@@ -526,7 +526,12 @@ noVideoData(videoRequest) {
    }
   }
 
-export default connect(null, {storeEventData})(Main);
+  const mapStateToProps = state => {
+    //const videoState = state.videoReducer;
+    return state;
+  }
+
+export default connect(mapStateToProps, {storeEventData})(Main);
 
 const styles = StyleSheet.create({
   container: {

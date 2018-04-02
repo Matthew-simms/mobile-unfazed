@@ -15,6 +15,8 @@ export const loginFb = (userInfo) => {
 };
 
 export const signup = (username) => {
-    return (dispatch) => {
+    return {
+        type: 'SIGNUP',
+        userInfo: username
     };
 };

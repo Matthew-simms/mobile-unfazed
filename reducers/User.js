@@ -4,6 +4,7 @@ const INITIAL_STATE =
 {
     username: '',
     userInfo:'',
+    modal: false,
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -18,6 +19,12 @@ export default (state = INITIAL_STATE, action) => {
                 isLoggedIn: true,
                 userInfo: action.userInfo,
             }); 
+        case 'SIGNUP': 
+        return Object.assign({}, state, { 
+            isLoggedIn: true,
+            modal: true,
+            userInfo: action.username,
+        }); 
     default:
       return state;
   }
