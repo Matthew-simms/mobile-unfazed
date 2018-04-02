@@ -4,6 +4,8 @@ import * as firebase from 'firebase';
 import Main from './Main';
 import { StackNavigator } from 'react-navigation';
 import { FormLabel, FormInput, Button } from 'react-native-elements'
+import { connect } from 'react-redux';
+import { login, loginFb } from '../actions';
 
 firebase.initializeApp({
         apiKey: "AIzaSyAh5TKxXzav7bYBvyO9dKQnTtvKMxjE0C0",
@@ -17,7 +19,7 @@ firebase.initializeApp({
 
 // const ACCESS_TOKEN = 'access_token'
 
-export default class login extends React.Component {
+class auth extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
@@ -25,46 +27,41 @@ export default class login extends React.Component {
             password: '123456', error: '', 
             loading: false,
             userInfo: null,
+            userName: null,
          };
     }
 
-    // async componentDidMount() {
-
-    //    await firebase.auth().onAuthStateChanged((user) => {
-    //       if (user != null) {
-    //         console.log(user)
-    //       }
-    //     })
-    //   }
-
-    onLoginPress() {
+   async onLoginPress() {
 
         this.setState({ error: '', loading: true });
 
-        const { email, password } = this.state;
-        firebase.auth().signInWithEmailAndPassword(email, password)
+        const { email, password, userName } = this.state;
+
+       await firebase.auth().signInWithEmailAndPassword(email, password)
             .then(() => {
+                this.props.onLogin(this.state.userName)
                 this.setState({ error: '', loading: false });
-                this.props.navigation.navigate('Main');
             })
             .catch(() => {
                 this.setState({ error: 'Authentication failed', loading: false });
             })
+
     }
 
     onSignUpPress() {
         this.setState({ error: '', loading: true });
-        const { email, password } = this.state;
+        const { email, password, userName } = this.state;
+        
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                this.setState({ error: '', loading: false });
-                this.props.navigation.navigate('Main');
+            .then((user) => {
+                // this.setState({ error: '', loading: false });
+                // this.props.navigation.navigate('Main');
+                return user.updateProfile({displayName: userName})
             })
             .catch(() => {
                 this.setState({ error: 'Authentication failed', loading: false });
             })
     }
-
 
   async loginWithFacebook() {
     this.setState({ error: '', loading: true });
@@ -76,13 +73,8 @@ export default class login extends React.Component {
         `https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`)
         const userInfo = await response.json()
         this.setState({ userInfo })
+        this.props.onLoginFB(this.state.userInfo)
         console.log(await userInfo)
-
-     // Save FB token to local storage
-        // await AsyncStorage.setItem(ACCESS_TOKEN, token);
-        // console.log('----------------')
-        // console.log(token)
-        // console.log('----------------')
 
     // add or check login info to Firebase
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
@@ -119,6 +111,12 @@ export default class login extends React.Component {
     render() {
         return (
             <View>
+                <FormLabel>User Name</FormLabel>
+                <FormInput
+                 value = {this.state.userName} 
+                 onChangeText={userName => this.setState({ userName })}
+                 placeholder='Jonny'
+                 />
                 <FormLabel>Email</FormLabel>
                 <FormInput
                  value = {this.state.email} 
@@ -140,6 +138,20 @@ export default class login extends React.Component {
         )
 
     }
-
-
 }
+
+const mapStateToProps = state => {
+    //const videoState = state.videoReducer;
+    return state;
+  }
+
+  const mapDispatchToProps = (dispatch) => {
+    return {
+        onLogin: (username) => { dispatch(login(username)); },
+        onLoginFB: (userInfo) => { dispatch(loginFb(userInfo)); },
+        onSignUp: (username) => { dispatch(signup(username)); }
+    }
+}
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(auth);
+  
