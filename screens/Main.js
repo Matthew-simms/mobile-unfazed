@@ -143,7 +143,8 @@ class Main extends React.Component {
       if (videoCount >= 8) {
         videoCount = 8
       }
-      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random')
+      const key = '9ac222abb8fa4c2892d3dc469f679b'
+      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random', { headers: { 'X-API-KEY': key } })
       .then((userFaces) => {
         { arr.uiFaces = userFaces.data;}
         })
@@ -367,6 +368,7 @@ noVideoData(videoRequest) {
           data={this.state.data}
           renderItem={rowParameter =>  {
           const rowData = rowParameter.item
+          // console.log("rowDATA",rowData)
           console.log('rowData'+ JSON.stringify(rowData))
             return (
               <TouchableOpacity
@@ -393,7 +395,7 @@ noVideoData(videoRequest) {
                           {/* Venue Name */}
                           <Text style={[styles.text]}>@ {rowData.place.name}</Text>
                           <View style={styles.imageRow}>
-                            {this.UiPrinter(rowData.uiFace)}
+                            {this.UiPrinter(rowData.uiFaces)}
                           </View> 
                         </View>
                         <Button

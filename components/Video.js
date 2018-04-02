@@ -21,6 +21,8 @@ class VideoComponent extends React.Component{
   }
 
   componentWillMount() {
+    console.log("USERNAMEEEEE",this.props.UserData.username)
+
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this.setState({
         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -142,7 +144,6 @@ class VideoComponent extends React.Component{
         }
       }
     }
-    console.log('username',this.props.UserData.username)
     console.log('hi');
   }
 
