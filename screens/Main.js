@@ -392,6 +392,9 @@ noVideoData(videoRequest) {
                           <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
                           {/* Venue Name */}
                           <Text style={[styles.text]}>@ {rowData.place.name}</Text>
+                          <View style={styles.imageRow}>
+                            {this.UiPrinter(rowData.uiFace)}
+                          </View> 
                         </View>
                         <Button
                           onPress={this._onRowPress.bind(this, rowData)}
