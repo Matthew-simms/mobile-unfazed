@@ -66,33 +66,6 @@ class Main extends React.Component {
     }
   }
   
-  registerForPushNotificationsAsync = async (currentUser) => {
-    const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-    let finalStatus = existingStatus;
-
-    // only ask if permissions have not already been determined, because
-    // iOS won't necessarily prompt the user a second time.
-    if (existingStatus !== 'granted') {
-        // Android remote notification permissions are granted during the app
-        // install, so this will only ask on iOS
-        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-        finalStatus = status;
-    }
-
-    // Stop here if the user did not grant permissions
-    if (finalStatus !== 'granted') {
-        return;
-    }
-
-    // Get the token that uniquely identifies this device
-    let token = await Notifications.getExpoPushTokenAsync();
-
-    // POST the token to our backend so we can use it to send pushes from there
-    var updates = {}
-    updates['/expoToken'] = token 
-    await firebase.database().ref('/users/' + currentUser.uid).update(updates)
-    //call the push notification 
-}
 
   async componentDidMount() {
    
@@ -228,6 +201,34 @@ noVideoData(videoRequest) {
    this._ToggleNextVenue()
    return;
  }
+}
+
+registerForPushNotificationsAsync = async (currentUser) => {
+  const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+  let finalStatus = existingStatus;
+
+  // only ask if permissions have not already been determined, because
+  // iOS won't necessarily prompt the user a second time.
+  if (existingStatus !== 'granted') {
+      // Android remote notification permissions are granted during the app
+      // install, so this will only ask on iOS
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+  }
+
+  // Stop here if the user did not grant permissions
+  if (finalStatus !== 'granted') {
+      return;
+  }
+
+  // Get the token that uniquely identifies this device
+  let token = await Notifications.getExpoPushTokenAsync();
+
+  // POST the token to our backend so we can use it to send pushes from there
+  var updates = {}
+  updates['/expoToken'] = token 
+  await firebase.database().ref('/users/' + currentUser.uid).update(updates)
+  //call the push notification 
 }
 
  _onRowPress = ( rowData ) => {
@@ -538,7 +539,7 @@ noVideoData(videoRequest) {
         {/* Event Details View */}
         <View style={this.viewStyle()}>
         <ScrollView>
-        <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bgImgs[selectedVenueIndex].image_link : currentVenue.upcomingArt[selectedVenueIndex].image_link }} style={ styles.detailsImgBg }>
+        {/* <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bgImgs[selectedVenueIndex].image_link : currentVenue.upcomingArt[selectedVenueIndex].image_link }} style={ styles.detailsImgBg }> */}
           <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
             {/* Background */}
             <View style={ styles.detailList }>
@@ -558,7 +559,7 @@ noVideoData(videoRequest) {
             <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
             </View>
           </View>
-        </ImageBackground>
+        {/* </ImageBackground> */}
         </ScrollView>
         </View>
       </Swiper>        
@@ -624,6 +625,7 @@ const styles = StyleSheet.create({
   detailList: {
     flex:1,
     padding: 20,
+    width: width
   },
   // Background image upcoming events
   imageBackgroundUpcoming: {
