@@ -89,13 +89,13 @@ class Main extends React.Component {
 
     // POST the token to our backend so we can use it to send pushes from there
     var updates = {}
-    updates['/expoToken'] = token
+    updates['/expoToken'] = token 
     await firebase.database().ref('/users/' + currentUser.uid).update(updates)
     //call the push notification 
 }
 
   async componentDidMount() {
-
+   
     var currentUser
     var that = this
     listener = firebase.auth().onAuthStateChanged(function (user) {
@@ -109,6 +109,9 @@ class Main extends React.Component {
         listener();
 
     });
+
+    // this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    
         // Camera Permisisons
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({ permissionsGranted: status === 'granted' });
