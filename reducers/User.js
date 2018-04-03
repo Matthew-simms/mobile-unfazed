@@ -23,7 +23,7 @@ export default (state = INITIAL_STATE, action) => {
         return Object.assign({}, state, { 
             isLoggedIn: true,
             modal: true,
-            userInfo: action.username,
+            username: action.username,
         }); 
     default:
       return state;

@@ -27,7 +27,7 @@ class auth extends React.Component {
             password: '123456', error: '', 
             loading: false,
             userInfo: null,
-            userName: null,
+            username: null,
          };
     }
 
@@ -35,11 +35,11 @@ class auth extends React.Component {
 
         this.setState({ error: '', loading: true });
 
-        const { email, password, userName } = this.state;
+        const { email, password, username } = this.state;
 
        await firebase.auth().signInWithEmailAndPassword(email, password)
             .then(() => {
-                this.props.onLogin(this.state.userName)
+                this.props.onLogin(this.state.username)
                 this.setState({ error: '', loading: false });
             })
             .catch(() => {
@@ -63,23 +63,23 @@ class auth extends React.Component {
 
     onSignUpPress() {
         this.setState({ error: '', loading: true });
-        const { email, password, userName } = this.state;
+        const { email, password, username } = this.state;
 
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((user) => {
                 // console.log('USERRR',user)
                 this.setState({ error: '', loading: false });
                 // this.props.navigation.navigate('Main');
-                this.props.onSignUp(this.state.userName)
+                this.props.onSignUp(this.state.username)
                 // add user parent of uid, email and username 
                 if (user) {
                     firebase.database().ref("users").child(user.uid).set({
                         email: user.email,
                         uid : user.uid,
-                        username: this.state.userName
+                        username: this.state.username
                     })
                 } 
-                return user.updateProfile({displayName: userName})
+                return user.updateProfile({displayName: username})
             })
             .catch(() => {
                 this.setState({ error: 'Authentication failed', loading: false });
@@ -136,8 +136,8 @@ class auth extends React.Component {
             <View>
                 <FormLabel>User Name</FormLabel>
                 <FormInput
-                 value = {this.state.userName} 
-                 onChangeText={userName => this.setState({ userName })}
+                 value = {this.state.username} 
+                 onChangeText={username => this.setState({ username })}
                  placeholder='Jonny'
                  />
                 <FormLabel>Email</FormLabel>
