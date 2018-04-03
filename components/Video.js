@@ -99,7 +99,14 @@ class VideoComponent extends React.Component{
         if (response.status !== 201) {
             console.log(response);
         } else {
-          console.log(response.body);
+        
+        console.log('first response', response);
+        this.props.stopUniversalLoading();
+        this.props.refreshMainC();
+        setTimeout(() => {
+          this.props.camOrVid('Camera');
+        }, 3000);
+
           function getRandomArbitrary(min, max) {
             return Math.random() * (max - min) + min;
           }
@@ -109,18 +116,10 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientUsername = this.props.UserData.username
           const transcodeVideo = await axios.get('http://192.168.1.127:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
 
-          console.log(transcodeVideo);
-          console.log(response);
-          if (response.success) {
-            this.props.stopUniversalLoading();
-            this.props.refreshMainC();
-            setTimeout(() => {
-              this.props.camOrVid('Camera');
-            }, 3000);
-          }
-         
-         
-          // if (transcodeVideo.data.status === 'success') {
+          console.log('response', response);
+          console.log('transcode', transcodeVideo);
+
+          // if (response.status === 201) {
           //   this.props.stopUniversalLoading();
           //   this.props.refreshMainC();
           //   setTimeout(() => {

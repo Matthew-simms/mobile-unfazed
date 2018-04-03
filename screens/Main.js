@@ -60,6 +60,7 @@ class Main extends React.Component {
       fontLoaded: false,
       bgImgsLoaded: false,
       playVideo: true,
+      username: '',
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
@@ -77,6 +78,7 @@ class Main extends React.Component {
             currentUser = user
 
             that.registerForPushNotificationsAsync(currentUser)
+            this.setState({ username: currentUser });
         }
 
         listener();
