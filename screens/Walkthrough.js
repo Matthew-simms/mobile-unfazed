@@ -6,31 +6,6 @@ import AppIntroSlider from 'react-native-app-intro-slider';
 
 const { width, height } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  mainContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  imageWalkThrough: {
-    width: 320,
-    height: 320,
-  },
-  text: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    backgroundColor: 'transparent',
-    textAlign: 'center',
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: 22,
-    color: 'white',
-    backgroundColor: 'transparent',
-    textAlign: 'center',
-    marginBottom: 16,
-  }
-});
-
 const slides = [
   {
     key: 'somethun',
@@ -56,8 +31,13 @@ const slides = [
 ];
 
 export default class Walk extends React.Component {
-  _handleDone = (e) => {
-    this.props.navigation.navigate('Login');
+
+  _handleSignupDone = (e) => {
+    this.props.navigation.navigate('Login'), { name: 'adam'};
+  }
+
+  _handleLoginDone = (e) => {
+    this.props.navigation.navigate('Login', { name: 'jake'});
   }
 
   _renderItem = props => (
@@ -86,36 +66,31 @@ export default class Walk extends React.Component {
         flexDirection: 'column',
         justifyContent: 'space-between'
       }}>
-        <View style={{   
-                    position: 'absolute', 
-                      zIndex: 2,
-                      height: 80,
-                      left: 0, 
-                      top: height - 80, 
-                      width: width,
-                      padding: 10,
-                      flexDirection: 'row', }}>
+        <View style={ style=styles.buttonRow }>
+
           <TouchableOpacity
-          onPress={(e) => this._handleDone(e, this)} >
-            <View style={{
-                        width: width/2 -10,
-                        zIndex: 3,
-                        marginRight: 5,
-                        flex: 1,
-                        borderWidth: 2,
-                        borderColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        }}>
-            <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Signup</Text>
+            onPress={() => {
+              /* 1. Navigate to the Auth route with params */
+              this.props.navigation.navigate('Login', {
+                fromWalkThrough: 'SIGNUP',
+              });
+            }} >
+            <View style={ styles.outlineBtnWhite  }>
+             <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Signup</Text>
             </View>
           </TouchableOpacity>
-          <View style={{backgroundColor: 'green',     
-                      width: width/2 -20,
-                      zIndex: 3,
-                      marginLeft: 5,
-                       }}>
-          </View>
+          <TouchableOpacity
+            onPress={() => {
+              /* 1. Navigate to the Auth route with params */
+              this.props.navigation.navigate('Login', {
+                fromWalkThrough: 'LOGIN',
+              });
+            }} >
+            <View style={ styles.outlineBtnWhite }>
+            <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Login</Text>
+            </View>
+          </TouchableOpacity>
+
       </View>
         <AppIntroSlider
           slides={slides}
@@ -123,7 +98,7 @@ export default class Walk extends React.Component {
           bottomButton
           hidePrevButton
           hideSkipButton
-          onDone={(e) => this._handleDone(e, this)}
+          onDone={(e) => this._handleLoginDone(e, this)}
           hideNextButton
           hideDoneButton
           onSkip={() => console.log("skipped")}
@@ -132,3 +107,48 @@ export default class Walk extends React.Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  imageWalkThrough: {
+    width: 320,
+    height: 320,
+  },
+  text: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
+  title: {
+    fontSize: 22,
+    color: 'white',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  buttonRow: {
+    position: 'absolute', 
+    zIndex: 2,
+    height: 80,
+    left: 0, 
+    top: height - 80, 
+    width: width,
+    padding: 10,
+    flexDirection: 'row',
+  },
+  outlineBtnWhite: {
+    width: width/2 -10,
+    zIndex: 3,
+    marginRight: 5,
+    flex: 1,
+    borderWidth: 2,
+    borderColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});

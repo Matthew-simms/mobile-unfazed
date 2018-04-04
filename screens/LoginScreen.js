@@ -31,6 +31,10 @@ class auth extends React.Component {
          };
     }
 
+    componentDidMount() {
+        console.log('userClickedSIGNUP',this.props.navigation.state);
+    }
+
    async onLoginPress() {
 
         this.setState({ error: '', loading: true });
