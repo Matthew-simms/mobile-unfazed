@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, AsyncStorage } from 'react-native'
+import { View, Text, AsyncStorage, StyleSheet } from 'react-native'
 import * as firebase from 'firebase';
 import Main from './Main';
 import { StackNavigator } from 'react-navigation';
-import { FormLabel, FormInput, Button } from 'react-native-elements'
+import { FormLabel, FormInput, Button, SocialIcon, Divider } from 'react-native-elements'
+import { MaterialIcons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import { login, loginFb, signup } from '../actions';
+import { mainCss } from '../styles/mainCss'
 
 firebase.initializeApp({
         apiKey: "AIzaSyAh5TKxXzav7bYBvyO9dKQnTtvKMxjE0C0",
@@ -28,11 +30,12 @@ class auth extends React.Component {
             loading: false,
             userInfo: null,
             username: null,
+            fromWalkThrough: this.props.navigation.state.params.fromWalkThrough
          };
     }
 
     componentDidMount() {
-        console.log('userClickedSIGNUP',this.props.navigation.state);
+        console.log('userClickedSIGNUP', this.state.fromWalkThrough);
     }
 
    async onLoginPress() {
@@ -121,28 +124,49 @@ class auth extends React.Component {
             return <Text> Loading </Text>
         }
         return <View>
-            <Button
+            { this.state.fromWalkThrough == "LOGIN" ?
+            <View>
+                <Button
+                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
                 onPress={this.onLoginPress.bind(this)}
                 title='Login'/>
-            <Button
+            </View> : null }
+
+            { this.state.fromWalkThrough == "SIGNUP" ?
+            <View>    
+                <Button
+                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
                 onPress={this.onSignUpPress.bind(this)}
                 title='Sign up'/>
-            <Button
-                onPress={this.loginWithFacebook.bind(this)}
-                title='Connect With Facebook'/>
-
+            </View> : null }
+           
+            <Divider style={{ backgroundColor: '#C7C7C7', marginTop: 20, marginBottom: 10 }} />
+            <SocialIcon
+            onPress={this.loginWithFacebook.bind(this)}
+            title='Connect With Facebook'
+            button
+            raised={false}
+            type='facebook'
+            />
+            
         </View>
 
     }
+    
     render() {
+
         return (
-            <View>
-                <FormLabel>User Name</FormLabel>
-                <FormInput
-                 value = {this.state.username} 
-                 onChangeText={username => this.setState({ username })}
-                 placeholder='Jonny'
-                 />
+            <View> 
+             { this.state.fromWalkThrough == "SIGNUP" ? 
+                <View>
+                    <FormLabel>User Name</FormLabel>
+                    <FormInput
+                    value = {this.state.username} 
+                    onChangeText={username => this.setState({ username })}
+                    placeholder='Jonny'
+                    /> 
+                </View>
+                : null }
                 <FormLabel>Email</FormLabel>
                 <FormInput
                  value = {this.state.email} 
@@ -181,3 +205,10 @@ const mapStateToProps = state => {
   
   export default connect(mapStateToProps, mapDispatchToProps)(auth);
   
+//   const styles = StyleSheet.create({
+//     button: {
+//         backgroundColor: '#6600EC',
+//         // alignSelf: 'stretch',
+//         // flex:1,
+//       },
+//   });
