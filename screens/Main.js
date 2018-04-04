@@ -60,7 +60,6 @@ class Main extends React.Component {
       fontLoaded: false,
       bgImgsLoaded: false,
       playVideo: true,
-      username: '',
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
@@ -76,13 +75,12 @@ class Main extends React.Component {
         if (user != null) {
 
             currentUser = user
+            // console.log('userFromCDM', currentUser.displayName)
 
             that.registerForPushNotificationsAsync(currentUser)
-            this.setState({ username: currentUser });
         }
 
         listener();
-
     });
 
     // this._notificationSubscription = Notifications.addListener(this._handleNotification);
@@ -373,7 +371,9 @@ registerForPushNotificationsAsync = async (currentUser) => {
   render() {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
-    ? <CameraC refreshMainC={this.refreshMainC} />
+    ? <CameraC 
+    refreshMainC={this.refreshMainC} 
+    usernameC={this.state.username}/>
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 

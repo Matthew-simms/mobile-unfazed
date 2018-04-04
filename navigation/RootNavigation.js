@@ -5,6 +5,8 @@ import Login from '../screens/LoginScreen';
 import Main from '../screens/Main';
 import WalkThrough from '../screens/Walkthrough';
 import * as firebase from 'firebase';
+import { connect } from 'react-redux';
+import { login } from '../actions';
 
 const LoggedOut = StackNavigator(
   {
@@ -41,7 +43,7 @@ const LoggedIn = StackNavigator(
   }
 );
 
-export default class RootNavigator extends React.Component {
+ class RootNavigator extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -59,8 +61,14 @@ export default class RootNavigator extends React.Component {
       this.setState({
         loading: false,
         user,
-      });
+      })
+      if (user != null) {
+        console.log('userFromCDM', user.displayName)
+        this.props.onLogin(user.displayName)
+      }
+
     });
+    
     console.log('----------------')
     console.log(this.state.user)
     console.log('----------------')
@@ -82,3 +90,16 @@ export default class RootNavigator extends React.Component {
           return <LoggedOut />;
   }
 }
+
+const mapStateToProps = state => {
+  //const videoState = state.videoReducer;
+  return state;
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+      onLogin: (username) => { dispatch(login(username)); },
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RootNavigator);

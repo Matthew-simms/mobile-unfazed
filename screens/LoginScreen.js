@@ -39,7 +39,6 @@ class auth extends React.Component {
 
        await firebase.auth().signInWithEmailAndPassword(email, password)
             .then(() => {
-                // this.props.onLogin(this.state.username)
                 this.setState({ error: '', loading: false });
             })
             .catch(() => {
