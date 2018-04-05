@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar } from 'react-native'
 import { Button } from 'react-native-elements'
 import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
 import axios from 'axios'
@@ -65,9 +65,10 @@ class Main extends React.Component {
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
     }
   }
-  
 
   async componentDidMount() {
+
+    StatusBar.setHidden(true)
    
     var currentUser
     var that = this
@@ -82,7 +83,6 @@ class Main extends React.Component {
 
         listener();
     });
-
     // this._notificationSubscription = Notifications.addListener(this._handleNotification);
     
         // Camera Permisisons
@@ -126,7 +126,7 @@ class Main extends React.Component {
             selectedVenueIndex: 0,
             selectedVidIndex: 0,
             vidLink: videoRequest.data.payload[0].instaVideoLink,
-            isVenueLoading: false
+            isVenueLoading: false,
           });
           console.log(this.state.currentVenue)
           await this.getUserFaces(allEventsRequest)
@@ -174,12 +174,11 @@ class Main extends React.Component {
       bgImgsLoaded: true,
       venue: arr,
       data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
-      ListData: [{key: 'On Now', arr}, {key: 'Upcoming', data: this.state.upcomingEvents}] // SectionList Data source
     }))
     this.props.storeEventData(arr.concat(this.state.upcomingEvents));
     console.log(this.state.venue)
     console.log("RAW concat data", this.state.data)
-    console.log('testData', this.state.ListData)
+    console.log('testData', this.state)
   }
 
     // method to check if there is venue data
@@ -369,6 +368,78 @@ registerForPushNotificationsAsync = async (currentUser) => {
     await this.componentDidMount();
   }
 
+  _renderSectionHeader = ({section}) => {
+    return (
+      <View>
+        <Text style={styles.sectionTitle}>{section.title}</Text>
+      </View>
+    )
+}
+
+  _renderItem = ({item, section}) => (
+    <TouchableOpacity
+              // Pass row style
+              style={styles.row}
+              // Call onPress function passed from List component when pressed
+              onPress={this._onRowPress.bind(this, item)}
+              // Dim row a little bit when pressed
+              activeOpacity={0.7}
+            >
+              { !item.upcomingEvent
+                ? <View style={ styles.elevationLow } borderRadius={9} > 
+                    <ImageBackground source={{uri: this._handleRandomIndex(item.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }>
+                        <LinearGradient
+                              colors={ this._handleRandomIndex(this.state.listColor) }
+                              start={[0.1,0.1]}
+                              end={[0.5,0.5]}
+                              style={{ padding: 20, borderRadius: 9 }}>
+                            
+                            <View style={ styles.listBackground }>
+                              
+                              <Text style={[styles.text, styles.red]}>On Now</Text>
+                            
+                              <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
+                              
+                              <Text style={[styles.text]}>@ {item.place.name}</Text>
+
+                                <View style={styles.imageRow}>
+                                  {this.UiPrinter(item.uiFaces)}
+                                  <Text style={styles.text}>{item.videoCount} Videos</Text>
+                                </View> 
+                            </View>
+                            <Button
+                              onPress={this._onRowPress.bind(this, item)}
+                              title={ 'Watch' }
+                              rounded
+                              buttonStyle={styles.button}
+                            />
+                        </LinearGradient>
+                      </ImageBackground>
+                    </View> 
+                : <View style={ styles.elevationLow } borderRadius={9} > 
+                    <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
+                      <View style={ styles.bgContainer }>
+                      
+                        <View style={ styles.listBackground }>
+                      
+                          <Text style={[styles.text]}>Upcoming</Text>
+                      
+                          <Text style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
+                  
+                          <Text style={[styles.text]}>@ {item.place.name} { [this._convertUTCDateToLocalDate(item.startTime).toString()] }</Text>
+                        </View>
+                          <Button
+                            title={ 'Watch most recent gig' }
+                            rounded
+                            buttonStyle={styles.button}
+                          />
+                      </View>
+                    </ImageBackground>
+                  </View>
+              }
+            </TouchableOpacity>
+  )
+  
   render() {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
@@ -378,7 +449,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
-    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo} = this.state;
+    let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
 
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded) {
       return (
@@ -397,7 +468,28 @@ registerForPushNotificationsAsync = async (currentUser) => {
       onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
-         <FlatList
+        <SectionList
+        renderItem={this._renderItem}
+        renderSectionHeader={this._renderSectionHeader}
+        stickySectionHeadersEnabled={false}
+              sections={[
+                {
+                  data: venue,
+                  title: 'On Now',
+                  renderItem: this._renderItem,
+                  keyExtractor: item => item.id,
+                  // ListEmptyComponent: this._renderEmpty
+                },
+                {
+                  data: this.state.upcomingEvents,
+                  title: 'Upcoming',
+                  renderItem: this._renderItem,
+                  keyExtractor: item => item.id,
+                  // ListEmptyComponent: this._renderEmpty
+                }
+              ]}
+             /> 
+         {/* <FlatList
           data={this.state.data}
           renderItem={rowParameter =>  {
           const rowData = rowParameter.item
@@ -419,13 +511,13 @@ registerForPushNotificationsAsync = async (currentUser) => {
                           start={[0.1,0.1]}
                           end={[0.5,0.5]}
                           style={{ padding: 20, borderRadius: 9 }}>
-                        {/* Background */}
+                        
                         <View style={ styles.listBackground }>
-                          {/* onNow */}
+                          
                           <Text style={[styles.text, styles.red]}>On Now</Text>
-                          {/* Title */}
+                        
                           <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                          {/* Venue Name */}
+                          
                           <Text style={[styles.text]}>@ {rowData.place.name}</Text>
                           <View style={styles.imageRow}>
                             {this.UiPrinter(rowData.uiFaces)}
@@ -441,13 +533,13 @@ registerForPushNotificationsAsync = async (currentUser) => {
                    </ImageBackground>
                 : <ImageBackground source={{uri: rowData.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
                     <View style={ styles.bgContainer }>
-                      {/* Background */}
+                    
                       <View style={ styles.listBackground }>
-                        {/* up coming */}
+                     
                         <Text style={[styles.text]}>Upcoming</Text>
-                        {/* Title */}
+                    
                         <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                        {/* Venue Name */}
+                 
                         <Text style={[styles.text]}>@ {rowData.place.name} { [this._convertUTCDateToLocalDate(rowData.startTime).toString()] }</Text>
                       </View>
                         <Button
@@ -461,8 +553,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
             </TouchableOpacity>
             )
           }}
-          keyExtractor={rowData => rowData.id}
-        />
+          keyExtractor={rowData => rowData.id} /> */}
       </View>
       <Swiper
         horizontal={false}
@@ -533,11 +624,11 @@ registerForPushNotificationsAsync = async (currentUser) => {
         />
          </View>
         </TouchableOpacity>
-        {/* { this.state.isBuffering ? (
+        { this.state.isBuffering ? (
             <View style={this.viewStyle()}>
               <Spinner visible={true} textContent={'Loading...'} textStyle={{color: '#FFF'}} />
             </View>
-          ) : null } */}
+          ) : null }
       </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>
@@ -602,11 +693,12 @@ const styles = StyleSheet.create({
   },
   // Row
   row: {
-    padding: 5  ,                   // Add padding at the bottom
+    padding: 20,                   // Add padding at the bottom
+    paddingBottom: 4
   },
   // Background 
   listBackground: {
-    height: screen.height / 5,          // Divide screen height by 3
+    height: screen.height / 4,          // Divide screen height by 3
   },
   // container for the button for upcoming
   bgContainer: {
@@ -619,7 +711,20 @@ const styles = StyleSheet.create({
   },
   // list bg image
   imageBackground: {
-    width: screen.width - 10,
+    width: screen.width - 40,
+  },
+  elevationLow: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 9, height: 7 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10,    
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   // details image
   detailsImgBg:  {
@@ -660,6 +765,14 @@ const styles = StyleSheet.create({
     fontFamily: 'katanas-edge',
     color: '#fff'
   },
+  // section title
+  sectionTitle: {
+    fontSize: 32,                       // Bigger font size
+    fontFamily: 'katanas-edge',
+    color: '#151515',
+    paddingLeft: 20,
+    marginTop: 40,
+  },
   // Background color text
   textBgBlue: {
     backgroundColor: 'blue',
@@ -685,7 +798,8 @@ const styles = StyleSheet.create({
   // UI faces row
   imageRow: {
     flexDirection: 'row',
-    paddingBottom: 10,
+    position: "absolute", bottom: 0, right: 0,
+    paddingBottom: 10
   },
   circleProgress: {
     alignSelf: 'flex-end',
