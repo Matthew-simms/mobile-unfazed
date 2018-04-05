@@ -87,6 +87,7 @@ class Main extends React.Component {
     
         // Camera Permisisons
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({ permissionsGranted: status === 'granted' });
     
         console.log(this.props.modal)
         console.log('qqqqqqqqqq')
