@@ -87,7 +87,6 @@ class Main extends React.Component {
     
         // Camera Permisisons
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ permissionsGranted: status === 'granted' });
     
         console.log(this.props.modal)
         console.log('qqqqqqqqqq')
@@ -174,11 +173,13 @@ class Main extends React.Component {
      this.setState(prevState => ({
       bgImgsLoaded: true,
       venue: arr,
-      data: arr.concat(this.state.upcomingEvents)
+      data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
+      ListData: [{key: 'On Now', arr}, {key: 'Upcoming', data: this.state.upcomingEvents}] // SectionList Data source
     }))
     this.props.storeEventData(arr.concat(this.state.upcomingEvents));
     console.log(this.state.venue)
-    console.log(this.state.data)
+    console.log("RAW concat data", this.state.data)
+    console.log('testData', this.state.ListData)
   }
 
     // method to check if there is venue data
