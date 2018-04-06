@@ -410,7 +410,8 @@ registerForPushNotificationsAsync = async (currentUser) => {
                             </View>
                             <Button
                               onPress={this._onRowPress.bind(this, item)}
-                              title={ 'Watch' }
+                              color={ "#6600EC" }
+                              title={ 'View' }
                               rounded
                               buttonStyle={styles.button}
                             />
@@ -430,7 +431,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
                           <Text style={[styles.text]}>@ {item.place.name} { [this._convertUTCDateToLocalDate(item.startTime).toString()] }</Text>
                         </View>
                           <Button
-                            title={ 'Watch most recent gig' }
+                            title={ 'Watch' }
                             rounded
                             buttonStyle={styles.button}
                           />
@@ -699,7 +700,7 @@ const styles = StyleSheet.create({
   },
   // Background 
   listBackground: {
-    height: screen.height / 4,          // Divide screen height by 3
+    height: screen.height / 2,          // Divide screen height by 3
   },
   // container for the button for upcoming
   bgContainer: {
@@ -785,9 +786,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',               // Arrange icon and rating in one line
   },
   button: {
-    backgroundColor: 'blue',
-    alignSelf: 'stretch',
-    flex:1,
+    backgroundColor: '#EEEEEE',
+    width: 80,
+    height: 30,
+    position: "absolute", 
+    bottom: 0, 
+    right: 0,
   },
   // UI faces on list
   uiFace: {
@@ -799,8 +803,10 @@ const styles = StyleSheet.create({
   // UI faces row
   imageRow: {
     flexDirection: 'row',
-    position: "absolute", bottom: 0, right: 0,
-    paddingBottom: 10
+    position: "absolute", 
+    bottom: 0, 
+    right: 0,
+    paddingBottom: 40
   },
   circleProgress: {
     alignSelf: 'flex-end',

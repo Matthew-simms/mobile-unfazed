@@ -30,6 +30,7 @@
     "randomcolor": "^0.5.3",
     "react": "16.2.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-25.0.0.tar.gz",
+    "react-native-animatable": "^1.2.4",
     "react-native-app-intro-slider": "^0.2.4",
     "react-native-aws3": "0.0.8",
     "react-native-circular-progress": "^0.1.2",
