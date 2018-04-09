@@ -11,6 +11,7 @@ import RootNavigation from '../navigation/RootNavigation';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { connect } from 'react-redux';
 import * as firebase from 'firebase';
+import TouchableScale from 'react-native-touchable-scale'
 
 import { storeEventData } from '../actions';
 import CameraC from './Camera';
@@ -378,13 +379,15 @@ registerForPushNotificationsAsync = async (currentUser) => {
 }
 
   _renderItem = ({item, section}) => (
-    <TouchableOpacity
+    <TouchableScale
               // Pass row style
               style={styles.row}
               // Call onPress function passed from List component when pressed
               onPress={this._onRowPress.bind(this, item)}
               // Dim row a little bit when pressed
-              activeOpacity={0.7}
+              activeScale={0.94}
+              tension={0}
+              friction={3}
             >
               { !item.upcomingEvent
                 ? <View style={ styles.elevationLow } borderRadius={9} > 
@@ -439,7 +442,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
                     </ImageBackground>
                   </View>
               }
-            </TouchableOpacity>
+            </TouchableScale>
   )
   
   render() {
@@ -491,71 +494,6 @@ registerForPushNotificationsAsync = async (currentUser) => {
                 }
               ]}
              /> 
-         {/* <FlatList
-          data={this.state.data}
-          renderItem={rowParameter =>  {
-          const rowData = rowParameter.item
-          // console.log("rowDATA",rowData)
-          console.log('rowData'+ JSON.stringify(rowData))
-            return (
-              <TouchableOpacity
-              // Pass row style
-              style={styles.row}
-              // Call onPress function passed from List component when pressed
-              onPress={this._onRowPress.bind(this, rowData)}
-              // Dim row a little bit when pressed
-              activeOpacity={0.7}
-            >
-              { !rowData.upcomingEvent
-                ? <ImageBackground source={{uri: this._handleRandomIndex(rowData.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }>
-                    <LinearGradient
-                          colors={ this._handleRandomIndex(this.state.listColor) }
-                          start={[0.1,0.1]}
-                          end={[0.5,0.5]}
-                          style={{ padding: 20, borderRadius: 9 }}>
-                        
-                        <View style={ styles.listBackground }>
-                          
-                          <Text style={[styles.text, styles.red]}>On Now</Text>
-                        
-                          <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                          
-                          <Text style={[styles.text]}>@ {rowData.place.name}</Text>
-                          <View style={styles.imageRow}>
-                            {this.UiPrinter(rowData.uiFaces)}
-                          </View> 
-                        </View>
-                        <Button
-                          onPress={this._onRowPress.bind(this, rowData)}
-                          title={ 'Watch' }
-                          rounded
-                          buttonStyle={styles.button}
-                        />
-                     </LinearGradient>
-                   </ImageBackground>
-                : <ImageBackground source={{uri: rowData.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
-                    <View style={ styles.bgContainer }>
-                    
-                      <View style={ styles.listBackground }>
-                     
-                        <Text style={[styles.text]}>Upcoming</Text>
-                    
-                        <Text style={[styles.text, styles.title]}>{rowData.eventName.toUpperCase()}</Text>
-                 
-                        <Text style={[styles.text]}>@ {rowData.place.name} { [this._convertUTCDateToLocalDate(rowData.startTime).toString()] }</Text>
-                      </View>
-                        <Button
-                          title={ 'Watch most recent gig' }
-                          rounded
-                          buttonStyle={styles.button}
-                        />
-                    </View>
-                  </ImageBackground>
-              }
-            </TouchableOpacity>
-            )
-          }}
-          keyExtractor={rowData => rowData.id} /> */}
       </View>
       <Swiper
         horizontal={false}

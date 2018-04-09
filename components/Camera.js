@@ -183,7 +183,9 @@ class CameraComponent extends React.Component {
         displayRec: 'none',
         cameraRunning: false
       });
-      this.props.camOrVid('Video');
+      setTimeout(() => {
+        this.props.camOrVid('Video');
+      }, 500);
       console.log('Stopped recording');
     }
   }
