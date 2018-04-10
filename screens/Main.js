@@ -397,15 +397,10 @@ registerForPushNotificationsAsync = async (currentUser) => {
                               start={[0.1,0.1]}
                               end={[0.5,0.5]}
                               style={{ padding: 20, borderRadius: 9 }}>
-                            
                             <View style={ styles.listBackground }>
-                              
                               <Text style={[styles.text, styles.red]}>On Now</Text>
-                            
                               <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
-                              
                               <Text style={[styles.text]}>@ {item.place.name}</Text>
-
                                 <View style={styles.imageRow}>
                                   {this.UiPrinter(item.uiFaces)}
                                   <Text style={styles.text}>{item.videoCount} Videos</Text>
@@ -414,7 +409,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
                             <Button
                               onPress={this._onRowPress.bind(this, item)}
                               color={ "#6600EC" }
-                              title={ 'View' }
+                              title={ 'Play' }
                               rounded
                               buttonStyle={styles.button}
                             />
@@ -422,23 +417,19 @@ registerForPushNotificationsAsync = async (currentUser) => {
                       </ImageBackground>
                     </View> 
                 : <View style={ styles.elevationLow } borderRadius={9} > 
-                    <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackgroundUpcoming }>
-                      <View style={ styles.bgContainer }>
-                      
-                        <View style={ styles.listBackground }>
-                      
-                          <Text style={[styles.text]}>Upcoming</Text>
-                      
-                          <Text style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
-                  
-                          <Text style={[styles.text]}>@ {item.place.name} { [this._convertUTCDateToLocalDate(item.startTime).toString()] }</Text>
-                        </View>
-                          <Button
-                            title={ 'Watch' }
-                            rounded
-                            buttonStyle={styles.button}
-                          />
-                      </View>
+                    <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
+                      <View style={[styles.listBackground, styles.paddingBg]}>
+                              <Text style={[styles.text, styles.red]}>Upcoming</Text>
+                              <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.red]}>{item.eventName.toUpperCase()}</Text>
+                              <Text style={[styles.text, styles.red]}>@ {item.place.name}</Text>
+                            </View>
+                            <Button
+                              onPress={this._onRowPress.bind(this, item)}
+                              color={ "#6600EC" }
+                              title={ 'Play' }
+                              rounded
+                              buttonStyle={[styles.button, styles.pb10]}
+                            />
                     </ImageBackground>
                   </View>
               }
@@ -504,12 +495,13 @@ registerForPushNotificationsAsync = async (currentUser) => {
 
         >
         <View style={this.viewStyle()}>
-          <TitleText label="Top" />
-          <View>
-            <Button
-              onPress={this.signOutUser.bind(this)}
-              title='Log Out'/>
-          </View>
+            {/* <View style={{  flex: 1, alignItems: 'stretch'}}> */}
+              <ImageBackground style={styles.profileImgBg} source={ require('../assets/images/Profile_bg.jpg') }>
+                <Button
+                  onPress={this.signOutUser.bind(this)}
+                  title='Log Out'/>
+              </ImageBackground>
+            {/* </View> */}
         </View>
         <View style={this.viewStyle()}>
         { this.props.UserData.modal 
@@ -573,15 +565,22 @@ registerForPushNotificationsAsync = async (currentUser) => {
         {/* Event Details View */}
         <View style={this.viewStyle()}>
         <ScrollView>
-        {/* <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bgImgs[selectedVenueIndex].image_link : currentVenue.upcomingArt[selectedVenueIndex].image_link }} style={ styles.detailsImgBg }> */}
           <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
             {/* Background */}
-            <View style={ styles.detailList }>
-            {/* Title */}
-            <Text style={[styles.title, styles.textBgBlue]}>{currentVenue.eventName.toUpperCase()}</Text>
-              {/* Venue Name */}
-            <Text style={[styles.text, styles.darkBlue]}>@ {currentVenue.place.name}</Text>
-
+            <View style={[styles.detailList]}>
+            <ImageBackground source={{uri: !currentVenue.upcomingEvent ? this._handleRandomIndex(currentVenue.bgImgs).image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
+              <LinearGradient
+                colors={ this._handleRandomIndex(this.state.listColor) }
+                start={[0.1,0.1]}
+                end={[0.5,0.5]}
+                style={{ padding: 20, borderRadius: 9 }}>
+              <View style={styles.listBackgroundDt}>
+                <Text style={[styles.text, styles.red]}>On Now</Text>
+                <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+                <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
+              </View>
+              </LinearGradient>
+            </ImageBackground>
              <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
               <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
               <View style={{flexDirection: 'column'}}>
@@ -589,11 +588,9 @@ registerForPushNotificationsAsync = async (currentUser) => {
                 <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
               </View>
             </View> 
-          
             <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
             </View>
           </View>
-        {/* </ImageBackground> */}
         </ScrollView>
         </View>
       </Swiper>        
@@ -636,9 +633,17 @@ const styles = StyleSheet.create({
     padding: 20,                   // Add padding at the bottom
     paddingBottom: 4
   },
-  // Background 
+  // Background of on now cards
   listBackground: {
     height: screen.height / 2,          // Divide screen height by 3
+  },
+  // Background of on now details
+  listBackgroundDt: {
+    height: screen.height / 5,          // Divide screen height by 3
+  },
+  paddingBg : {
+    padding: 20, 
+    borderRadius: 9,
   },
   // container for the button for upcoming
   bgContainer: {
@@ -670,6 +675,11 @@ const styles = StyleSheet.create({
   detailsImgBg:  {
     width: width
   },
+   // profile imagebg
+   profileImgBg:  {
+    width: width,
+    height: height
+  },
   detailList: {
     flex:1,
     padding: 20,
@@ -699,11 +709,20 @@ const styles = StyleSheet.create({
   red: {
     color: '#FF0000'
   },
+  pb10: {
+    bottom: 20
+  },
   // title
   title: {
     fontSize: 22,                       // Bigger font size
     fontFamily: 'katanas-edge',
     color: '#fff'
+  },
+   // upcomingtitle
+   titleUpcoming: {
+    fontSize: 38,                       // Bigger font size
+    fontFamily: 'katanas-edge',
+    color: 'red'
   },
   // section title
   sectionTitle: {

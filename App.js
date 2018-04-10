@@ -20,7 +20,10 @@ export default class App extends React.Component {
     async _loadAssetsAsync() {
       try {
         await cacheAssetsAsync({
-          images: [require('./assets/images/nav-tute.png')],
+          images: [
+            require('./assets/images/nav-tute.png'),
+            require('./assets/images/Profile_bg.jpg')
+          ],
           fonts: [
             { 'katanas-edge': require('./assets/fonts/katanas-edge.ttf') },
           ],
