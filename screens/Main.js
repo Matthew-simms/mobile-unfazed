@@ -492,7 +492,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
         showsPagination={false}
         index={1}
         ref={(swiper) => {this.swiper = swiper;}}
-
+        onMomentumScrollEnd={this.onScrollEnd}
         >
         <View style={this.viewStyle()}>
             {/* <View style={{  flex: 1, alignItems: 'stretch'}}> */}
