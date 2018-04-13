@@ -164,15 +164,21 @@ class Main extends React.Component {
   // GET list background images for each event add to eventsOn array
   async getEventBgImg() {
     let bgImgLen = await this.state.venue[0].length
-    console.log(bgImgLen)
+    console.log("bgImgLen: " + bgImgLen)
     const arr = this.state.venue[0]
+
+    // Get all background images
     const bgImgRes = await axios.get('http://concertly-app.herokuapp.com/v1/venues/image?q=' + bgImgLen)
-    bgImg = bgImgRes.data.payload
-    console.log(bgImg)
-    arr.forEach(function(itm){
-      { itm.bgImgs = bgImg;}
-     });
-     this.setState(prevState => ({
+    let bgImgs = bgImgRes.data.payload
+    console.log(bgImgs)
+
+    // Set background image for each items
+    arr.forEach(function(item) {
+      item.bg_image_link = this._handleRandomIndex(bgImgs).image_link;
+      item.gradient_colors = this._handleRandomIndex(this.state.listColor);
+    });
+
+    this.setState(prevState => ({
       bgImgsLoaded: true,
       venue: arr,
       data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
@@ -183,102 +189,102 @@ class Main extends React.Component {
     console.log('testData', this.state)
   }
 
-    // method to check if there is venue data
-noVenueData(allEventsRequest) {
-  if (allEventsRequest.data.payload.length == 0) {
-    this.setState(prevState => ({
-      isVenueLoading: false,
-    }))
-    return;
-  }
-}
-
-noVideoData(videoRequest) {
-  // check if there is data if none goto next venue
-  if (videoRequest.data.payload.length == 0) {
-    let nextVenue = null;
-    let selectedVenueIndex = this.state.venue.findIndex(v => v.eventId == this.state.currentVenue.eventId);
-    if (selectedVenueIndex >= 0) {
-      if (selectedVenueIndex + 1 < this.state.venue.length || this.state.upcomingEvents.length == 0) {
-        nextVenue = this.state.venue[(selectedVenueIndex + 1) % this.state.venue.length];
-      } else {
-        nextVenue = this.state.upcomingEvents[0];
-      }
+  // method to check if there is venue data
+  noVenueData(allEventsRequest) {
+    if (allEventsRequest.data.payload.length == 0) {
+      this.setState(prevState => ({
+        isVenueLoading: false,
+      }))
+      return;
     }
-    else {
-      selectedVenueIndex = this.state.upcomingEvents.findIndex(v => v.eventId == this.state.currentVenue.eventId);
+  }
+
+  noVideoData(videoRequest) {
+    // check if there is data if none goto next venue
+    if (videoRequest.data.payload.length == 0) {
+      let nextVenue = null;
+      let selectedVenueIndex = this.state.venue.findIndex(v => v.eventId == this.state.currentVenue.eventId);
       if (selectedVenueIndex >= 0) {
-        if (selectedVenueIndex + 1 < this.state.upcomingEvents.length || this.state.venue.length == 0) {
-          nextVenue = this.state.upcomingEvents[(selectedVenueIndex + 1) % this.state.upcomingEvents.length];
+        if (selectedVenueIndex + 1 < this.state.venue.length || this.state.upcomingEvents.length == 0) {
+          nextVenue = this.state.venue[(selectedVenueIndex + 1) % this.state.venue.length];
         } else {
-          nextVenue = this.state.venue[0];
+          nextVenue = this.state.upcomingEvents[0];
         }
       }
+      else {
+        selectedVenueIndex = this.state.upcomingEvents.findIndex(v => v.eventId == this.state.currentVenue.eventId);
+        if (selectedVenueIndex >= 0) {
+          if (selectedVenueIndex + 1 < this.state.upcomingEvents.length || this.state.venue.length == 0) {
+            nextVenue = this.state.upcomingEvents[(selectedVenueIndex + 1) % this.state.upcomingEvents.length];
+          } else {
+            nextVenue = this.state.venue[0];
+          }
+        }
+      }
+
+      if (!nextVenue)
+        return;
+
+      console.log("No video data: move to " + nextVenue.eventId);
+
+      // eventId: rowData.eventId,
+      // currentVenue: rowData,
+
+      this.setState(prevState => ({
+        eventId: nextVenue.eventId,
+        currentVenue: nextVenue,
+        isLoading: true
+      }));
+
+      // update selectedVenueIndex
+      this._handleSelectedEvent();
+    }
+  }
+
+  registerForPushNotificationsAsync = async (currentUser) => {
+    const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    let finalStatus = existingStatus;
+
+    // only ask if permissions have not already been determined, because
+    // iOS won't necessarily prompt the user a second time.
+    if (existingStatus !== 'granted') {
+        // Android remote notification permissions are granted during the app
+        // install, so this will only ask on iOS
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+        finalStatus = status;
     }
 
-    if (!nextVenue)
-      return;
+    // Stop here if the user did not grant permissions
+    if (finalStatus !== 'granted') {
+        return;
+    }
 
-    console.log("No video data: move to " + nextVenue.eventId);
+    // Get the token that uniquely identifies this device
+    let token = await Notifications.getExpoPushTokenAsync();
 
-    // eventId: rowData.eventId,
-    // currentVenue: rowData,
+    // POST the token to our backend so we can use it to send pushes from there
+    var updates = {}
+    updates['/expoToken'] = token 
+    await firebase.database().ref('/users/' + currentUser.uid).update(updates)
+    //call the push notification 
+  }
 
+  _onRowPress = ( rowData ) => {
+    // Navigate back to Home video screen
+    this.swiper.scrollBy(1)
+    // pass row event id data
     this.setState(prevState => ({
-      eventId: nextVenue.eventId,
-      currentVenue: nextVenue,
+      eventId: rowData.eventId,
+      currentVenue: rowData,
+      // selectedVenueIndex: selectedVenueIndex,
       isLoading: true
     }));
 
     // update selectedVenueIndex
-    this._handleSelectedEvent();
-  }
-}
-
-registerForPushNotificationsAsync = async (currentUser) => {
-  const { existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-  let finalStatus = existingStatus;
-
-  // only ask if permissions have not already been determined, because
-  // iOS won't necessarily prompt the user a second time.
-  if (existingStatus !== 'granted') {
-      // Android remote notification permissions are granted during the app
-      // install, so this will only ask on iOS
-      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-      finalStatus = status;
+    this._handleSelectedEvent()
   }
 
-  // Stop here if the user did not grant permissions
-  if (finalStatus !== 'granted') {
-      return;
-  }
-
-  // Get the token that uniquely identifies this device
-  let token = await Notifications.getExpoPushTokenAsync();
-
-  // POST the token to our backend so we can use it to send pushes from there
-  var updates = {}
-  updates['/expoToken'] = token 
-  await firebase.database().ref('/users/' + currentUser.uid).update(updates)
-  //call the push notification 
-}
-
- _onRowPress = ( rowData ) => {
-  // Navigate back to Home video screen
-  this.swiper.scrollBy(1)
-  // pass row event id data
-  this.setState(prevState => ({
-    eventId: rowData.eventId,
-    currentVenue: rowData,
-    // selectedVenueIndex: selectedVenueIndex,
-    isLoading: true
-  }));
-
-  // update selectedVenueIndex
-  this._handleSelectedEvent()
-}
-
- async _handleSelectedEvent () {
+  async _handleSelectedEvent () {
     // pass eventId from selected row
     const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + this.state.eventId);
     // console.log(videoRequest)
@@ -331,71 +337,71 @@ registerForPushNotificationsAsync = async (currentUser) => {
   _nextVideo = (e) => {
     this.setState({ isPlaying: false });
 
-      if (this.state.selectedVidIndex == this.state.videos.length - 1)
-        return;
-          this.setState(prevState => ({
-          selectedVidIndex: prevState.selectedVidIndex + 1,
-        }))
-    }
+    if (this.state.selectedVidIndex == this.state.videos.length - 1)
+      return;
 
-   // Map array and show UI faces in render
-   UiPrinter(array) {
+    this.setState(prevState => ({
+      selectedVidIndex: prevState.selectedVidIndex + 1,
+    }));
+  }
+
+  // Map array and show UI faces in render
+  UiPrinter(array) {
     if (array) {
-    return array.map(function(images, index) {
-      // don't put your key as index, choose other unique values as your key.
-      return <Image
-        key={index}
-        source={{uri: images.photo}}
-        style={ styles.uiFace } />
-    })
+      return array.map(function(images, index) {
+        // don't put your key as index, choose other unique values as your key.
+        return <Image
+          key={index}
+          source={{uri: images.photo}}
+          style={ styles.uiFace } />
+      });
+    }
   }
+
+  // function to choose a random index in an array
+  _handleRandomIndex(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
   }
 
-    // function to choose a random index in an array
-    _handleRandomIndex(arr) {
-      return arr[Math.floor(Math.random() * arr.length)]
+  // Date Time converter to local
+  _convertUTCDateToLocalDate(UTCdate) {
+    var newDate = new Date(UTCdate);
+    return newDate;
+    console.log(newDate)
+  }
+
+  //To know curent index in Swiper
+  onScrollEnd = (e, state) => {
+    console.log('INDEX IS: ', state.index);
+    if (state.index === 2 || state.index === 0) {
+      this.setState({
+        playVideo: false
+      });
+    } else if (state.index === 1) {
+      this.setState({
+        playVideo: true
+      })
     }
+  }
 
-    // Date Time converter to local
-    _convertUTCDateToLocalDate(UTCdate) {
-      var newDate = new Date(UTCdate);
-      return newDate;
-      console.log(newDate)
+  // Camera Record no permissions
+  renderNoPermissions() {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
+        <Text style={{ color: 'white' }}>
+          Camera permissions not granted - cannot open camera preview.
+        </Text>
+      </View>
+    );
+  }
+
+  signOutUser = async () => {
+    try {
+        await firebase.auth().signOut();
+        navigate('auth');
+    } catch (e) {
+        console.log(e);
     }
-
-    //To know curent index in Swiper
-    onScrollEnd = (e, state) => {
-      console.log('INDEX IS: ', state.index);
-      if (state.index === 2 || state.index === 0) {
-        this.setState({
-          playVideo: false
-        });
-      } else if (state.index === 1) {
-        this.setState({
-          playVideo: true
-        })
-      }
-    }
-
-// Camera Record no permissions
-    renderNoPermissions() {
-      return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
-          <Text style={{ color: 'white' }}>
-            Camera permissions not granted - cannot open camera preview.
-          </Text>
-        </View>
-      );
-    }
-
-
-    signOutUser = async () => {
-      try {
-          await firebase.auth().signOut();
-          navigate('auth');
-      } catch (e) {
-          console.log(e);
-      }
   }
 
   async refreshMainC() {
@@ -409,7 +415,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
         <Text style={styles.sectionTitle}>{section.title}</Text>
       </View>
     )
-}
+  }
 
   _renderItem = ({item, section}) => (
     <TouchableScale
@@ -424,9 +430,9 @@ registerForPushNotificationsAsync = async (currentUser) => {
             >
               { !item.upcomingEvent
                 ? <View style={ styles.elevationLow } borderRadius={9} > 
-                    <ImageBackground source={{uri: this._handleRandomIndex(item.bgImgs).image_link }} borderRadius={9} style={ styles.imageBackground }>
+                    <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
-                              colors={ this._handleRandomIndex(this.state.listColor) }
+                              colors={ item.gradient_colors }
                               start={[0.1,0.1]}
                               end={[0.5,0.5]}
                               style={{ padding: 20, borderRadius: 9 }}>
@@ -528,13 +534,13 @@ registerForPushNotificationsAsync = async (currentUser) => {
         onMomentumScrollEnd={this.onScrollEnd}
         >
         <View style={this.viewStyle()}>
-            {/* <View style={{  flex: 1, alignItems: 'stretch'}}> */}
-              <ImageBackground style={styles.profileImgBg} source={ require('../assets/images/Profile_bg.jpg') }>
-                <Button
-                  onPress={this.signOutUser.bind(this)}
-                  title='Log Out'/>
-              </ImageBackground>
-            {/* </View> */}
+          {/* <View style={{  flex: 1, alignItems: 'stretch'}}> */}
+            <ImageBackground style={styles.profileImgBg} source={ require('../assets/images/Profile_bg.jpg') }>
+              <Button
+                onPress={this.signOutUser.bind(this)}
+                title='Log Out'/>
+            </ImageBackground>
+          {/* </View> */}
         </View>
         <View style={this.viewStyle()}>
           { this.props.UserData.modal 
@@ -603,9 +609,9 @@ registerForPushNotificationsAsync = async (currentUser) => {
           <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
             {/* Background */}
             <View style={[styles.detailList]}>
-            <ImageBackground source={{uri: !currentVenue.upcomingEvent ? this._handleRandomIndex(currentVenue.bgImgs).image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
+            <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
-                colors={ this._handleRandomIndex(this.state.listColor) }
+                colors={ currentVenue.gradient_colors }
                 start={[0.1,0.1]}
                 end={[0.5,0.5]}
                 style={{ padding: 20, borderRadius: 9 }}>
@@ -631,8 +637,8 @@ registerForPushNotificationsAsync = async (currentUser) => {
           </View>
         </ScrollView>
         </View>
-      </Swiper>        
-        <View style={styles.camContainer}>{content}</View>
+      </Swiper>
+      <View style={styles.camContainer}>{content}</View>
     </Swiper>
     )
    }
