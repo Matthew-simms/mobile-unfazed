@@ -74,65 +74,65 @@ class Main extends React.Component {
     var currentUser
     var that = this
     listener = firebase.auth().onAuthStateChanged(function (user) {
-        if (user != null) {
+      if (user != null) {
 
-            currentUser = user
-            // console.log('userFromCDM', currentUser.displayName)
+          currentUser = user
+          // console.log('userFromCDM', currentUser.displayName)
 
-            that.registerForPushNotificationsAsync(currentUser)
-        }
+          that.registerForPushNotificationsAsync(currentUser)
+      }
 
-        listener();
+      listener();
     });
     // this._notificationSubscription = Notifications.addListener(this._handleNotification);
     
-        // Camera Permisisons
-        const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ permissionsGranted: status === 'granted' });
-    
-        console.log(this.props.modal)
-        console.log('qqqqqqqqqq')
-        console.log(this.props.userInfo)
-        /*
-         * http://localhost:5000/v1/venues/search/uk?q=London&o=2
-         * onLoad pass location data, GET first item(venue) in db with most videos
-         * then pass eventId, GET videos in that event, load latest posted video
-         */
-          // GET all events currently on in London
-          const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-          console.log(allEventsRequest.data.payload)
-          this.noVenueData(allEventsRequest)
-    
-          // console.log(venueRequest.data.payload[0].place.name)
-          const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
-          .catch(function(error) {
-            console.log(error.message);
-              throw error;
-            })
-          console.log(videoRequest.data.payload[0])
-          this.noVideoData(videoRequest)
-    
-        // GET upcoming events in London
-        const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
-        .catch(function(error) {
-          console.log('MEE:', error.message);
-            throw error;
-          })
-        console.log(upcomingEventsRequest.data.payload)
-    
-          this.setState({
-            venue:  allEventsRequest.data.payload,
-            currentVenue: allEventsRequest.data.payload[0],
-            videos: videoRequest.data.payload,
-            upcomingEvents : upcomingEventsRequest.data.payload,
-            selectedVenueIndex: 0,
-            selectedVidIndex: 0,
-            vidLink: videoRequest.data.payload[0].instaVideoLink,
-            isVenueLoading: false,
-          });
-          console.log(this.state.currentVenue)
-          await this.getUserFaces(allEventsRequest)
-        }
+    // Camera Permisisons
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ permissionsGranted: status === 'granted' });
+
+    console.log(this.props.modal)
+    console.log('qqqqqqqqqq')
+    console.log(this.props.userInfo)
+    /*
+     * http://localhost:5000/v1/venues/search/uk?q=London&o=2
+     * onLoad pass location data, GET first item(venue) in db with most videos
+     * then pass eventId, GET videos in that event, load latest posted video
+     */
+    // GET all events currently on in London
+    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
+    console.log(allEventsRequest.data.payload)
+    this.noVenueData(allEventsRequest)
+
+    // console.log(venueRequest.data.payload[0].place.name)
+    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
+    .catch(function(error) {
+      console.log(error.message);
+        throw error;
+      })
+    console.log(videoRequest.data.payload[0])
+    this.noVideoData(videoRequest)
+
+    // GET upcoming events in London
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
+    .catch(function(error) {
+      console.log('MEE:', error.message);
+      throw error;
+    })
+    console.log(upcomingEventsRequest.data.payload)
+
+    this.setState({
+      venue: allEventsRequest.data.payload,
+      currentVenue: allEventsRequest.data.payload[0],
+      videos: videoRequest.data.payload,
+      upcomingEvents : upcomingEventsRequest.data.payload,
+      selectedVenueIndex: 0,
+      selectedVidIndex: 0,
+      vidLink: videoRequest.data.payload[0].instaVideoLink,
+      isVenueLoading: false,
+    });
+    console.log(this.state.currentVenue)
+    await this.getUserFaces(allEventsRequest)
+  }
 
   // GET fake user photos from www.uifaces.co/api add to eventsOn array
   async getUserFaces (allEventsRequest)  {
@@ -196,13 +196,43 @@ noVenueData(allEventsRequest) {
 noVideoData(videoRequest) {
   // check if there is data if none goto next venue
   if (videoRequest.data.payload.length == 0) {
-   this.setState(prevState => ({
-     isVenueLoading: false,
-     selectedVenueIndex: 1,
-   }))
-   this._ToggleNextVenue()
-   return;
- }
+    let nextVenue = null;
+    let selectedVenueIndex = this.state.venue.findIndex(v => v.eventId == this.state.currentVenue.eventId);
+    if (selectedVenueIndex >= 0) {
+      if (selectedVenueIndex + 1 < this.state.venue.length || this.state.upcomingEvents.length == 0) {
+        nextVenue = this.state.venue[(selectedVenueIndex + 1) % this.state.venue.length];
+      } else {
+        nextVenue = this.state.upcomingEvents[0];
+      }
+    }
+    else {
+      selectedVenueIndex = this.state.upcomingEvents.findIndex(v => v.eventId == this.state.currentVenue.eventId);
+      if (selectedVenueIndex >= 0) {
+        if (selectedVenueIndex + 1 < this.state.upcomingEvents.length || this.state.venue.length == 0) {
+          nextVenue = this.state.upcomingEvents[(selectedVenueIndex + 1) % this.state.upcomingEvents.length];
+        } else {
+          nextVenue = this.state.venue[0];
+        }
+      }
+    }
+
+    if (!nextVenue)
+      return;
+
+    console.log("No video data: move to " + nextVenue.eventId);
+
+    // eventId: rowData.eventId,
+    // currentVenue: rowData,
+
+    this.setState(prevState => ({
+      eventId: nextVenue.eventId,
+      currentVenue: nextVenue,
+      isLoading: true
+    }));
+
+    // update selectedVenueIndex
+    this._handleSelectedEvent();
+  }
 }
 
 registerForPushNotificationsAsync = async (currentUser) => {
@@ -240,58 +270,61 @@ registerForPushNotificationsAsync = async (currentUser) => {
   this.setState(prevState => ({
     eventId: rowData.eventId,
     currentVenue: rowData,
-    // selectedVenueIndex: rowData.index
-   }))
-   console.log(rowData)
-   // update selectedVenueIndex
+    // selectedVenueIndex: selectedVenueIndex,
+    isLoading: true
+  }));
+
+  // update selectedVenueIndex
   this._handleSelectedEvent()
 }
 
  async _handleSelectedEvent () {
     // pass eventId from selected row
     const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + this.state.eventId);
-    console.log(videoRequest)
+    // console.log(videoRequest)
+
     // update video state with new videos
     this.setState(prevState => ({
       videos: videoRequest.data.payload,
       selectedVidIndex: 0,
-    }));
-    this.noVideoData(videoRequest)
+      isLoading: false
+    }));     
+    this.noVideoData(videoRequest);
   }
 
-    viewStyle() {
-      return {
-        flex: 1,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-        alignItems: 'center',
+  viewStyle() {
+    return {
+      flex: 1,
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }
+  }
+
+  _playbackCallback(playbackStatus) {
+    if (playbackStatus.isLoaded) {
+      this.setState({
+        playbackInstancePosition:  playbackStatus.positionMillis, 
+        playbackInstanceDuration:  playbackStatus.durationMillis,
+        playbackSeconds: Math.round(((playbackStatus.positionMillis / 1000) % 60)), 
+        countdown : 100 - Math.floor((this.state.playbackInstancePosition / this.state.playbackInstanceDuration)*100),
+        shouldPlay: playbackStatus.shouldPlay,
+        isPlaying: playbackStatus.isPlaying,
+        isBuffering: playbackStatus.isBuffering,
+        rate: playbackStatus.rate,
+        muted: playbackStatus.isMuted,
+        volume: playbackStatus.volume,
+        shouldCorrectPitch: playbackStatus.shouldCorrectPitch,
+        progressTime: playbackStatus.progressUpdateIntervalMillis
+      });
+      // console.log(this.state.progressTime)
+
+      if (playbackStatus.didJustFinish) {
+        //.
+        // The player has just finished playing and will stop.
+        this._nextVideo()
       }
     }
-
-    _playbackCallback(playbackStatus) {
-      if (playbackStatus.isLoaded) {
-        this.setState({
-          playbackInstancePosition:  playbackStatus.positionMillis, 
-          playbackInstanceDuration:  playbackStatus.durationMillis,
-          playbackSeconds: Math.round(((playbackStatus.positionMillis / 1000) % 60)), 
-          countdown : 100 - Math.floor((this.state.playbackInstancePosition / this.state.playbackInstanceDuration)*100),
-          shouldPlay: playbackStatus.shouldPlay,
-          isPlaying: playbackStatus.isPlaying,
-          isBuffering: playbackStatus.isBuffering,
-          rate: playbackStatus.rate,
-          muted: playbackStatus.isMuted,
-          volume: playbackStatus.volume,
-          shouldCorrectPitch: playbackStatus.shouldCorrectPitch,
-          progressTime: playbackStatus.progressUpdateIntervalMillis
-        });
-        // console.log(this.state.progressTime)
-
-        if (playbackStatus.didJustFinish) {
-          //.
-          // The player has just finished playing and will stop.
-          this._nextVideo()
-        }
-      }
   }
 
   // next video function
@@ -504,15 +537,16 @@ registerForPushNotificationsAsync = async (currentUser) => {
             {/* </View> */}
         </View>
         <View style={this.viewStyle()}>
-        { this.props.UserData.modal 
-           ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)'}}>
-                <Image source={ require('../assets/images/nav-tute.png') } />
-                <Text style={[styles.text]}>MODAL PLACEHOLDER FOR NAV GUIDE</Text> 
-             </View>
-            : <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
-                 <Text style={[styles.text]}>test</Text> 
-             </View>
-        }
+          { this.props.UserData.modal 
+            ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)'}}>
+                  <Image source={ require('../assets/images/nav-tute.png') } />
+                  <Text style={[styles.text]}>MODAL PLACEHOLDER FOR NAV GUIDE</Text> 
+              </View>
+              : <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
+                  <Text style={[styles.text]}>test</Text> 
+              </View>
+          }
+          { videos[selectedVidIndex] ? 
           <TouchableOpacity
            onPress={(e) => this._nextVideo(e, this)}
            activeOpacity={0.7}
@@ -522,47 +556,47 @@ registerForPushNotificationsAsync = async (currentUser) => {
               flexDirection: 'column',
               justifyContent: 'space-between'
             }}>
-            <View style={{width: width, height: 50, padding: 10, paddingLeft:20, flexDirection: 'row', position: 'absolute', zIndex: 2, }}>
-              <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-              <Text style={[styles.text]} style={{marginTop: 'auto', marginBottom: 'auto', marginLeft: 5}}>{videos[selectedVidIndex].userName}</Text> 
+              <View style={{width: width, height: 50, padding: 10, paddingLeft:20, flexDirection: 'row', position: 'absolute', zIndex: 2, }}>
+                <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
+                <Text style={[styles.text]} style={{marginTop: 'auto', marginBottom: 'auto', marginLeft: 5}}>{videos[selectedVidIndex].userName}</Text>
+              </View>
+              <View style={{ backgroundColor: 'rgba(255,255,255,0)',
+                            position: 'absolute', 
+                            zIndex: 2,
+                            height: 80,
+                            left: 0, 
+                            top: height - 90, 
+                            width: width,
+                            padding: 10,
+                            overflow: 'hidden'
+                            }} >
+                {/* onNow */}
+                <Text style={[styles.text, styles.red]}>On Now</Text> 
+                {/* Title */}
+                <Text style={[styles.title]}>{currentVenue.eventName}</Text>
+                {/* Venue Name */}
+                <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
+              </View> 
+              <Video
+                source={{ uri: videos[selectedVidIndex].instaVideoLink }}
+                onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
+                rate={1.0}
+                volume={0.0}
+                muted={true}
+                resizeMode="cover"
+                shouldPlay={playVideo}
+                isLooping
+                style={styles.VideoContainer}
+              />
             </View>
-            <View style={{ backgroundColor: 'rgba(255,255,255,0)',
-                          position: 'absolute', 
-                          zIndex: 2,
-                          height: 80,
-                          left: 0, 
-                          top: height - 90, 
-                          width: width,
-                          padding: 10,
-                          overflow: 'hidden'
-                          }} >
-              {/* onNow */}
-              <Text style={[styles.text, styles.red]}>On Now</Text> 
-              {/* Title */}
-              <Text style={[styles.title]}>{currentVenue.eventName}</Text>
-              {/* Venue Name */}
-              <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
-            </View> 
-          <Video
-          source={{ uri: videos[selectedVidIndex].instaVideoLink }}
-          onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
-          rate={1.0}
-          volume={0.0}
-          muted={true}
-          resizeMode="cover"
-          shouldPlay={playVideo}
-          isLooping
-          style={styles.VideoContainer}
-
-        />
-         </View>
-        </TouchableOpacity>
-        { this.state.isBuffering ? (
+          </TouchableOpacity>
+          : null }
+          { this.state.isBuffering ? (
             <View style={this.viewStyle()}>
               <Spinner visible={true} textContent={'Loading...'} textStyle={{color: '#FFF'}} />
             </View>
           ) : null }
-      </View>
+        </View>
         {/* Event Details View */}
         <View style={this.viewStyle()}>
         <ScrollView>
@@ -582,13 +616,16 @@ registerForPushNotificationsAsync = async (currentUser) => {
               </View>
               </LinearGradient>
             </ImageBackground>
-             <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
-              <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-              <View style={{flexDirection: 'column'}}>
-                <Text style={[styles.text, styles.blk]}>Currently playing video by</Text> 
-                <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
+            { videos[selectedVidIndex] ?
+              <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
+                <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
+                <View style={{flexDirection: 'column'}}>
+                  <Text style={[styles.text, styles.blk]}>Currently playing video by</Text> 
+                  <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
+                </View>
               </View>
-            </View> 
+              : null
+            }
             <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
             </View>
           </View>
