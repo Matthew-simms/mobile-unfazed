@@ -509,7 +509,7 @@ registerForPushNotificationsAsync = async (currentUser) => {
                 <Image source={ require('../assets/images/nav-tute.png') } />
                 <Text style={[styles.text]}>MODAL PLACEHOLDER FOR NAV GUIDE</Text> 
              </View>
-            : <View style={{ backgroundColor: 'rgba(0,0,0,0.8)'}}>
+            : <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
                  <Text style={[styles.text]}>test</Text> 
              </View>
         }
@@ -524,16 +524,17 @@ registerForPushNotificationsAsync = async (currentUser) => {
             }}>
             <View style={{width: width, height: 50, padding: 10, paddingLeft:20, flexDirection: 'row', position: 'absolute', zIndex: 2, }}>
               <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-              <Text style={[styles.text]}>{videos[selectedVidIndex].userName}</Text> 
+              <Text style={[styles.text]} style={{marginTop: 'auto', marginBottom: 'auto', marginLeft: 5}}>{videos[selectedVidIndex].userName}</Text> 
             </View>
             <View style={{ backgroundColor: 'rgba(255,255,255,0)',
                           position: 'absolute', 
                           zIndex: 2,
                           height: 80,
                           left: 0, 
-                          top: height - 80, 
+                          top: height - 90, 
                           width: width,
                           padding: 10,
+                          overflow: 'hidden'
                           }} >
               {/* onNow */}
               <Text style={[styles.text, styles.red]}>On Now</Text> 
