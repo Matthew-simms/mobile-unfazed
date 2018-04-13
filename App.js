@@ -1,5 +1,6 @@
 import React from 'react'
 import { Provider } from 'react-redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import ReduxThunk from 'redux-thunk';
 import { createStore, applyMiddleware } from 'redux';
 import RootNavigation from './navigation/RootNavigation';
@@ -56,7 +57,7 @@ export default class App extends React.Component {
       }
 
       if (!Constants.isDevice) {
-      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || composeWithDevTools;
       return (
         <Provider store={createStore(reducers, {}, composeEnhancers(applyMiddleware(ReduxThunk)))}>
           <RootNavigation />
