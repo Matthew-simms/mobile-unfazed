@@ -173,10 +173,10 @@ class Main extends React.Component {
     console.log(bgImgs)
 
     // Set background image for each items
-    arr.forEach(function(item) {
-      item.bg_image_link = this._handleRandomIndex(bgImgs).image_link;
-      item.gradient_colors = this._handleRandomIndex(this.state.listColor);
-    });
+    for (i = 0; i < arr.length; i++) {
+      arr[i].bg_image_link = this._handleRandomIndex(bgImgs).image_link;
+      arr[i].gradient_colors = this._handleRandomIndex(this.state.listColor);
+    }
 
     this.setState(prevState => ({
       bgImgsLoaded: true,
