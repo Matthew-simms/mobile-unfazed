@@ -61,6 +61,7 @@ class Main extends React.Component {
       fontLoaded: false,
       bgImgsLoaded: false,
       playVideo: true,
+      photoURL: '',
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
@@ -77,7 +78,9 @@ class Main extends React.Component {
       if (user != null) {
 
           currentUser = user
-          // console.log('userFromCDM', currentUser.displayName)
+          console.log('return user', currentUser.displayName)
+          console.log('a user', currentUser.photoURL)
+          that.setState({ photoURL: currentUser.photoURL });
 
           that.registerForPushNotificationsAsync(currentUser)
       }
@@ -91,8 +94,6 @@ class Main extends React.Component {
     this.setState({ permissionsGranted: status === 'granted' });
 
     console.log(this.props.modal)
-    console.log('qqqqqqqqqq')
-    console.log(this.props.userInfo)
     /*
      * http://localhost:5000/v1/venues/search/uk?q=London&o=2
      * onLoad pass location data, GET first item(venue) in db with most videos
@@ -450,7 +451,7 @@ class Main extends React.Component {
                               color={ "#6600EC" }
                               title={ 'Play' }
                               rounded
-                              buttonStyle={styles.button}
+                              buttonStyle={[styles.button, styles.btmRightBtn]}
                             />
                         </LinearGradient>
                       </ImageBackground>
@@ -467,7 +468,7 @@ class Main extends React.Component {
                               color={ "#6600EC" }
                               title={ 'Play' }
                               rounded
-                              buttonStyle={[styles.button, styles.pb10]}
+                              buttonStyle={[styles.button, styles.btmRightBtn, styles.pb10]}
                             />
                     </ImageBackground>
                   </View>
@@ -536,9 +537,19 @@ class Main extends React.Component {
         <View style={this.viewStyle()}>
           {/* <View style={{  flex: 1, alignItems: 'stretch'}}> */}
             <ImageBackground style={styles.profileImgBg} source={ require('../assets/images/Profile_bg.jpg') }>
-              <Button
+            <View style={{justifyContent: 'center', alignItems: 'center', height: '100%',}}>
+                { this.state.photoURL ?
+                <Image style={styles.profileImg} source={{uri: this.state.photoURL}}/>
+                :<Image style={styles.profileImg} source={require('../assets/images/Profile_avatar_placeholder.png')}/>}
+                <Text style={[styles.profileName]}>{this.props.UserData.username}</Text> 
+             </View>
+             <Button
+                color={ "#6600EC" }
+                title={ 'Log Out' }
+                rounded
+                buttonStyle={[styles.button, styles.btnWidth100, styles.btmRightBtn]}
                 onPress={this.signOutUser.bind(this)}
-                title='Log Out'/>
+                />
             </ImageBackground>
           {/* </View> */}
         </View>
@@ -564,7 +575,7 @@ class Main extends React.Component {
             }}>
               <View style={{width: width, height: 50, padding: 10, paddingLeft:20, flexDirection: 'row', position: 'absolute', zIndex: 2, }}>
                 <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-                <Text style={[styles.text]} style={{marginTop: 'auto', marginBottom: 'auto', marginLeft: 5}}>{videos[selectedVidIndex].userName}</Text>
+                <Text style={[styles.text, styles.usernameS]}>{videos[selectedVidIndex].userName}</Text>
               </View>
               <View style={{ backgroundColor: 'rgba(255,255,255,0)',
                             position: 'absolute', 
@@ -619,6 +630,9 @@ class Main extends React.Component {
                 <Text style={[styles.text, styles.red]}>On Now</Text>
                 <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
                 <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
+                <Button
+                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
+                title='Buy Tickets'/>
               </View>
               </LinearGradient>
             </ImageBackground>
@@ -722,7 +736,8 @@ const styles = StyleSheet.create({
    // profile imagebg
    profileImgBg:  {
     width: width,
-    height: height
+    height: height,
+    padding: 20,
   },
   detailList: {
     flex:1,
@@ -742,6 +757,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',     // No background
     fontFamily: 'Avenir',               // Change default font
   },
+  usernameS: {
+    marginTop: 'auto', 
+    marginBottom: 'auto', 
+    marginLeft: 5
+  },
   // black
   blk: {
     color: 'black',                      // Black text color
@@ -752,6 +772,9 @@ const styles = StyleSheet.create({
   // red color
   red: {
     color: '#FF0000'
+  },
+  white: {
+    color: '#fff'
   },
   pb10: {
     bottom: 20
@@ -782,6 +805,12 @@ const styles = StyleSheet.create({
     padding: 10,
     flexWrap: 'wrap'
   },
+  profileName: {
+    marginTop: 10,
+    fontSize: 38,                       // Bigger font size
+    fontFamily: 'katanas-edge',
+    color: '#00D4EF'
+  },
   // Rating row
   rating: {
     flexDirection: 'row',               // Arrange icon and rating in one line
@@ -790,9 +819,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEEEEE',
     width: 80,
     height: 30,
+  },
+  //
+  btmRightBtn: {
     position: "absolute", 
     bottom: 0, 
     right: 0,
+  },
+  // button width longer
+  btnWidth100: {
+    width: 100,
   },
   // UI faces on list
   uiFace: {
@@ -800,6 +836,14 @@ const styles = StyleSheet.create({
     width: 34,
     borderRadius: 17,
     marginLeft: -10,  
+  },
+   // Profile image
+   profileImg: {
+    height: 100,
+    width: 100,
+    borderRadius: 50, 
+    borderWidth: 3,
+    borderColor: '#fff' 
   },
   // UI faces row
   imageRow: {

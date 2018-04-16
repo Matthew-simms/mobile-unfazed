@@ -130,8 +130,8 @@ class VideoComponent extends React.Component{
         });
     }
 
-    arr[3].place.location.longitude = location.coords.longitude;
-    arr[3].place.location.latitude = location.coords.latitude;
+    // arr[3].place.location.longitude = location.coords.longitude;
+    // arr[3].place.location.latitude = location.coords.latitude;
 
 
     for (var i = 0; i < arr.length; i++) {

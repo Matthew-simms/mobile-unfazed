@@ -103,7 +103,6 @@ class auth extends React.Component {
         const userInfo = await response.json()
         this.setState({ userInfo })
         this.props.onLoginFB(this.state.userInfo)
-        console.log(await userInfo)
 
     // add or check login info to Firebase
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
@@ -112,6 +111,14 @@ class auth extends React.Component {
       .then(() => {
         this.setState({ error: '', loading: false });
         this.props.navigation.navigate('Main');
+          // save user data to firebase 
+        //  if ( this.state.userInfo ) {
+        //     await firebase.database().ref("users").child(userInfo.uid).set({
+        //          uid : userInfo.id,
+        //          username: userInfo.name,
+        //          profilePicture: userInfo.picture.data.url
+        //      })
+        //  }
     })
     .catch((error) => {
         this.setState({ error: 'Authentication failed', loading: false }); 
