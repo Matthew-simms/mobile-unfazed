@@ -62,9 +62,12 @@ class Main extends React.Component {
       bgImgsLoaded: false,
       playVideo: true,
       photoURL: '',
+      signupModal: this.props.UserData.modal,
+      fakeData: [],
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
-        ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)']],
+        ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)'],
+        ['rgba(155,0,154,0.8)', 'rgba(84,0,87,0.8)']],
     }
   }
 
@@ -94,6 +97,8 @@ class Main extends React.Component {
     this.setState({ permissionsGranted: status === 'granted' });
 
     console.log(this.props.modal)
+    
+    // pause video if user has signed in
     /*
      * http://localhost:5000/v1/venues/search/uk?q=London&o=2
      * onLoad pass location data, GET first item(venue) in db with most videos
@@ -405,6 +410,12 @@ class Main extends React.Component {
     }
   }
 
+  toggleModal() {
+    this.setState({
+      signupModal: !this.state.signupModal,
+    });
+  }
+
   async refreshMainC() {
     console.log('Called to refresh');
     await this.componentDidMount();
@@ -417,6 +428,12 @@ class Main extends React.Component {
       </View>
     )
   }
+
+  // list empty state
+  _renderEmpty = ({item, section}) => (
+        <Text style={[styles.center]}>No events on right now, come back and check later or view some upcoming events below</Text>
+    )
+  
 
   _renderItem = ({item, section}) => (
     <TouchableScale
@@ -512,9 +529,9 @@ class Main extends React.Component {
                 {
                   data: venue,
                   title: 'On Now',
-                  renderItem: this._renderItem,
+                  renderItem:  this._renderItem,
                   keyExtractor: item => item.id,
-                  // ListEmptyComponent: this._renderEmpty
+                  ListEmptyComponent: this._renderEmpty
                 },
                 {
                   data: this.state.upcomingEvents,
@@ -554,14 +571,20 @@ class Main extends React.Component {
           {/* </View> */}
         </View>
         <View style={this.viewStyle()}>
-          { this.props.UserData.modal 
-            ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)'}}>
-                  <Image source={ require('../assets/images/nav-tute.png') } />
-                  <Text style={[styles.text]}>MODAL PLACEHOLDER FOR NAV GUIDE</Text> 
+          { this.state.signupModal
+            ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
+                <Text style={[styles.text]}>test</Text> 
               </View>
-              : <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
-                  <Text style={[styles.text]}>test</Text> 
-              </View>
+              :
+              <View style={styles.modal}>
+               <Image style={{marginBottom:20}} source={ require('../assets/images/nav-tute.png') } />
+              <Text style={[styles.text]}>Swipe up, down, left and right to navigate</Text> 
+              <Button
+                onPress={this.toggleModal.bind(this)}
+                color={ "#6600EC" }
+                buttonStyle={{ backgroundColor: '#fff', borderWidth:1, borderColor:'#fff', borderRadius: 40, height: 50, marginTop:20 }}
+                title='Okay, got it!'/>
+             </View>
           }
           { videos[selectedVidIndex] ? 
           <TouchableOpacity
@@ -587,7 +610,6 @@ class Main extends React.Component {
                             padding: 10,
                             overflow: 'hidden'
                             }} >
-                {/* onNow */}
                 <Text style={[styles.text, styles.red]}>On Now</Text> 
                 {/* Title */}
                 <Text style={[styles.title]}>{currentVenue.eventName}</Text>
@@ -668,6 +690,15 @@ export default connect(mapStateToProps, {storeEventData})(Main);
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  modal: {
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    position: 'absolute',
+    height: height,
+    width: width,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   view: {
     flex: 1,
@@ -756,6 +787,15 @@ const styles = StyleSheet.create({
     color: '#fff',                      // White text color
     backgroundColor: 'transparent',     // No background
     fontFamily: 'Avenir',               // Change default font
+  },
+  //no data in list on Now text
+  center: {
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 16, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    padding: 20,
   },
   usernameS: {
     marginTop: 'auto', 
