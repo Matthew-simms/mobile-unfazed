@@ -111,14 +111,6 @@ class auth extends React.Component {
       .then(() => {
         this.setState({ error: '', loading: false });
         this.props.navigation.navigate('Main');
-          // save user data to firebase 
-        //  if ( this.state.userInfo ) {
-        //     await firebase.database().ref("users").child(userInfo.uid).set({
-        //          uid : userInfo.id,
-        //          username: userInfo.name,
-        //          profilePicture: userInfo.picture.data.url
-        //      })
-        //  }
     })
     .catch((error) => {
         this.setState({ error: 'Authentication failed', loading: false }); 
@@ -211,11 +203,3 @@ const mapStateToProps = state => {
 }
   
   export default connect(mapStateToProps, mapDispatchToProps)(auth);
-  
-//   const styles = StyleSheet.create({
-//     button: {
-//         backgroundColor: '#6600EC',
-//         // alignSelf: 'stretch',
-//         // flex:1,
-//       },
-//   });

@@ -63,6 +63,7 @@ class Main extends React.Component {
       playVideo: true,
       photoURL: '',
       signupModal: this.props.UserData.modal,
+      cameraModal: this.props.UserData.modal,
       fakeData: [],
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
@@ -416,6 +417,12 @@ class Main extends React.Component {
     });
   }
 
+  toggleCamModal() {
+    this.setState({
+      cameraModal: !this.state.cameraModal,
+    });
+  }
+
   async refreshMainC() {
     console.log('Called to refresh');
     await this.componentDidMount();
@@ -450,7 +457,7 @@ class Main extends React.Component {
                 ? <View style={ styles.elevationLow } borderRadius={9} > 
                     <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
-                              colors={ item.gradient_colors }
+                              colors={ item.gradient_colors ? item.gradient_colors : ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)']}
                               start={[0.1,0.1]}
                               end={[0.5,0.5]}
                               style={{ padding: 20, borderRadius: 9 }}>
@@ -571,7 +578,7 @@ class Main extends React.Component {
           {/* </View> */}
         </View>
         <View style={this.viewStyle()}>
-          { this.state.signupModal
+          { !this.state.signupModal
             ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
                 <Text style={[styles.text]}>test</Text> 
               </View>
@@ -644,7 +651,7 @@ class Main extends React.Component {
             <View style={[styles.detailList]}>
             <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
-                colors={ currentVenue.gradient_colors }
+                colors={ currentVenue.gradient_colors ? currentVenue.gradient_colors : ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'] }
                 start={[0.1,0.1]}
                 end={[0.5,0.5]}
                 style={{ padding: 20, borderRadius: 9 }}>
@@ -674,7 +681,19 @@ class Main extends React.Component {
         </ScrollView>
         </View>
       </Swiper>
-      <View style={styles.camContainer}>{content}</View>
+      { !this.state.cameraModal
+            ?  <View style={styles.camContainer}>{content}</View>
+              :
+              <View style={styles.modal}>
+              <Text style={[styles.text]}>Film when you are at a music event</Text> 
+              <Button
+                onPress={this.toggleCamModal.bind(this)}
+                color={ "#6600EC" }
+                buttonStyle={{ backgroundColor: '#fff', borderWidth:1, borderColor:'#fff', borderRadius: 40, height: 50, marginTop:20 }}
+                title='Awesome, got it!'/>
+             </View>
+          }
+     
     </Swiper>
     )
    }
