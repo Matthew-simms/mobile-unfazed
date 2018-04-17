@@ -16,7 +16,8 @@ class VideoComponent extends React.Component{
       location: null,
       errorMessage: null,
       isSending: false,
-      playVideo: true
+      playVideo: true,
+      notAtLoc: false,
     };
   }
 
@@ -130,25 +131,29 @@ class VideoComponent extends React.Component{
         });
     }
 
-    // arr[3].place.location.longitude = location.coords.longitude;
-    // arr[3].place.location.latitude = location.coords.latitude;
+    arr[3].place.location.longitude = location.coords.longitude;
+    arr[3].place.location.latitude = location.coords.latitude;
 
 
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].isEventOn) {
         //searching within 1km
         const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
-        console.log(result);
+        console.log('checking location', result);
         if (result) {
           this.props.startUniversalLoading();
           postToEvent(arr[i]);
-        }
+        } 
+        // else {
+        //   this.setState({ notAtLoc: true })
+        // }
       }
     }
     console.log('hi');
   }
 
   render() {
+    
     if (this.props.universalLoadingRed) {
       return (
         <View style={this.viewStyle()}>
@@ -156,6 +161,14 @@ class VideoComponent extends React.Component{
          </View>
       );
     }
+
+    // if (this.state.notAtLoc) {
+    //   return (
+    //     <View style={this.viewStyle()}>
+    //       <Text>Not at location</Text>
+    //      </View>
+    //   );
+    // }
 
     let { playVideo } = this.state;
     let uri = this.props.camDataReducer.uri;

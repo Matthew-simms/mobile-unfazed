@@ -457,7 +457,7 @@ class Main extends React.Component {
                 ? <View style={ styles.elevationLow } borderRadius={9} > 
                     <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
-                              colors={ item.gradient_colors ? item.gradient_colors : ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)']}
+                              colors={ item.gradient_colors}
                               start={[0.1,0.1]}
                               end={[0.5,0.5]}
                               style={{ padding: 20, borderRadius: 9 }}>
@@ -511,7 +511,7 @@ class Main extends React.Component {
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
 
-    if (this.state.isVenueLoading || !this.state.bgImgsLoaded) {
+    if (this.state.isVenueLoading || !this.state.bgImgsLoaded || !venue) {
       return (
         <View style={this.viewStyle()}>
           <Spinner visible={true} textContent={"Loading..."} textStyle={{color: '#FFF'}} />
@@ -651,7 +651,7 @@ class Main extends React.Component {
             <View style={[styles.detailList]}>
             <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
-                colors={ currentVenue.gradient_colors ? currentVenue.gradient_colors : ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'] }
+                colors={ currentVenue.gradient_colors }
                 start={[0.1,0.1]}
                 end={[0.5,0.5]}
                 style={{ padding: 20, borderRadius: 9 }}>
