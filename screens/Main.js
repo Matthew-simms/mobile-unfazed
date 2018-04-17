@@ -148,14 +148,14 @@ class Main extends React.Component {
     arr.push(events)
     // console.log(arr)
     await Promise.all(events.map(async arr => {
-      console.log(arr.videoCount);
       let videoCount = arr.videoCount
       if (videoCount >= 8) {
         videoCount = 8
       }
       const key = '9ac222abb8fa4c2892d3dc469f679b'
-      const response = axios.get('http://uifaces.co/api?limit=' + videoCount + '&random', { headers: { 'X-API-KEY': key } })
+      const response = axios.get('http://concertly-app.herokuapp.com/v1/venues/uifaces?q=' + videoCount)
       .then((userFaces) => {
+        console.log('uifaces1', userFaces);
         { arr.uiFaces = userFaces.data;}
         })
       const user = await response
@@ -359,7 +359,7 @@ class Main extends React.Component {
         // don't put your key as index, choose other unique values as your key.
         return <Image
           key={index}
-          source={{uri: images.photo}}
+          source={{uri: images.userPhotoLink}}
           style={ styles.uiFace } />
       });
     }
@@ -466,7 +466,7 @@ class Main extends React.Component {
                               <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
                               <Text style={[styles.text]}>@ {item.place.name}</Text>
                                 <View style={styles.imageRow}>
-                                  {this.UiPrinter(item.uiFaces)}
+                                  {this.UiPrinter(item.uiFaces.payload)}
                                   <Text style={styles.text}>{item.videoCount} Videos</Text>
                                 </View> 
                             </View>
