@@ -24,10 +24,14 @@ export default class App extends React.Component {
           images: [
             require('./assets/images/nav-tute.png'),
             require('./assets/images/Profile_bg.jpg'),
-            require('./assets/images/Profile_avatar_placeholder.png')
+            require('./assets/images/Profile_avatar_placeholder.png'),
+            require('./assets/images/Slide_1_icon.png'),
+            require('./assets/images/slide_2_icon.png'),
+            require('./assets/images/slide_3_icon.png'),
           ],
           fonts: [
             { 'katanas-edge': require('./assets/fonts/katanas-edge.ttf') },
+            { 'opensans': require('./assets/fonts/OpenSans.ttf') },
           ],
         });
       } catch (e) {
