@@ -139,31 +139,35 @@ class VideoComponent extends React.Component{
     arr[3].place.location.latitude = location.coords.latitude;
 
     // Post video if user in location, otherwise rendering Oops screen.
-    const distanceResult = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: this.props.currentVenue.place.location.longitude, lat: this.props.currentVenue.place.location.latitude }, 1);
-    if ( this.props.currentVenue.isEventOn && distanceResult) {
-      this.props.startUniversalLoading();
-      postToEvent(this.props.currentVenue);
-      console.log('Posted--->');
-    } else {
-      this.setState({ isNearBy: true });  
-      console.log('Post failed due to location');
-    }
-    // for (var i = 0; i < arr.length; i++) {
-    //   if (arr[i].isEventOn) {
-    //     //searching within 1km
-    //     const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
-    //     console.log('checking location', result);
-    //     if (this.props.currentVenue.eventId == arr[i].eventId && result) {
-    //       this.props.startUniversalLoading();
-    //       postToEvent(arr[i]);
-    //     } 
-    //     else if(this.state.currentVenue.eventId == arr[i].eventId && result){
-    //       this.setState({ notAtLoc: true });
-    //       this.setState({ isNearBy: true });     
-    //       //return false;     
-    //     }
-    //   }
+    // const distanceResult = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: this.props.currentVenue.place.location.longitude, lat: this.props.currentVenue.place.location.latitude }, 1);
+    // if ( this.props.currentVenue.isEventOn && distanceResult) {
+    //   this.props.startUniversalLoading();
+    //   postToEvent(this.props.currentVenue);
+    //   console.log('Posted--->');
+    // } else {
+    //   this.setState({ isNearBy: true });  
+    //   console.log('Post failed due to location');
     // }
+    let eventNearOn = false;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].isEventOn) {
+        //searching within 1km
+        const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
+        console.log('checking location', result);
+        if (result) {
+          this.props.startUniversalLoading();
+          postToEvent(arr[i]);
+          eventNearOn = true;
+        } 
+        else {
+          this.setState({ notAtLoc: true });
+          eventNearOn = false;
+        }
+      }
+    }
+    if (!eventNearOn) {
+      this.setState({ isNearBy: true });
+    }
     console.log('hi');
   }
 
