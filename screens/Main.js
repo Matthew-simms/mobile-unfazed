@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar, Modal } from 'react-native'
 import { Button } from 'react-native-elements'
 import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
 import axios from 'axios'
@@ -44,7 +44,7 @@ class Main extends React.Component {
       }),
       data: null,
       playbackInstanceDuration: null,
-      venue: [],
+      venue: [{"eventName": "exception"}],
       currentVenue: [],
       videos: [],
       eventId: null,
@@ -64,6 +64,7 @@ class Main extends React.Component {
       photoURL: '',
       signupModal: this.props.UserData.modal,
       cameraModal: this.props.UserData.modal,
+      isBuyTicketOpened: false,
       fakeData: [],
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
@@ -437,9 +438,9 @@ class Main extends React.Component {
   }
 
   // list empty state
-  _renderEmpty = ({item, section}) => (
+  _renderEmpty () {
         <Text style={[styles.center]}>No events on right now, come back and check later or view some upcoming events below</Text>
-    )
+  }
   
 
   _renderItem = ({item, section}) => (
@@ -499,6 +500,54 @@ class Main extends React.Component {
               }
             </TouchableScale>
   )
+  _renderOnNowItem = ({item, section}) => (
+    item.eventName == "exception"
+    ? 
+    <View style={ styles.emptyRow } borderRadius={9} > 
+      <Text style={styles.center1}>No events on right now, come back</Text>
+      <Text style={styles.center2}>and check later or view some</Text> 
+      <Text style={styles.center3}>upcoming events below</Text>
+    </View> 
+    :
+    <TouchableScale
+              // Pass row style
+              style={styles.row}
+              // Call onPress function passed from List component when pressed
+              onPress={this._onRowPress.bind(this, item)}
+              // Dim row a little bit when pressed
+              activeScale={0.94}
+              tension={0}
+              friction={3}
+            >
+              <View style={ styles.elevationLow } borderRadius={9} > 
+                    <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
+                        <LinearGradient
+                              colors={ item.gradient_colors}
+                              start={[0.1,0.1]}
+                              end={[0.5,0.5]}
+                              style={{ padding: 20, borderRadius: 9 }}>
+                            <View style={ styles.listBackground }>
+                              <Text style={[styles.text, styles.red]}>On Now</Text>
+                              <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
+                              <Text style={[styles.text]}>@ {item.place.name}</Text>
+                                <View style={styles.imageRow}>
+                                  {this.UiPrinter(item.uiFaces.payload)}
+                                  <Text style={styles.text}>{item.videoCount} Videos</Text>
+                                </View> 
+                            </View>
+                            {item.eventName != this.state.currentVenue.eventName ?
+                            <Button
+                              onPress={this._onRowPress.bind(this, item)}
+                              color={ "#6600EC" }
+                              title={ 'Play' }
+                              rounded
+                              buttonStyle={[styles.button, styles.btmRightBtn]}
+                            />: <TouchableOpacity style={{ position: 'absolute', bottom: 30, right: 40 }}><Text style={{ color: 'white', fontSize: 18,}}>Playing</Text></TouchableOpacity>}
+                        </LinearGradient>
+                      </ImageBackground>
+                    </View> 
+            </TouchableScale>
+  )
   
   render() {
     // Camera show state
@@ -510,7 +559,7 @@ class Main extends React.Component {
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
-
+    //venue = [{"eventName": "exception"}];
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded || !venue) {
       return (
         <View style={this.viewStyle()}>
@@ -518,7 +567,6 @@ class Main extends React.Component {
          </View>
       );
     }
-
     return (
       <Swiper
       loop={false}
@@ -536,7 +584,7 @@ class Main extends React.Component {
                 {
                   data: venue,
                   title: 'On Now',
-                  renderItem:  this._renderItem,
+                  renderItem:  this._renderOnNowItem,
                   keyExtractor: item => item.id,
                   ListEmptyComponent: this._renderEmpty
                 },
@@ -651,7 +699,7 @@ class Main extends React.Component {
             <View style={[styles.detailList]}>
             <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
-                colors={ currentVenue.gradient_colors }
+                colors={ !currentVenue.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : currentVenue.gradient_colors }
                 start={[0.1,0.1]}
                 end={[0.5,0.5]}
                 style={{ padding: 20, borderRadius: 9 }}>
@@ -660,6 +708,7 @@ class Main extends React.Component {
                 <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
                 <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
                 <Button
+                onPress={() => this.setState({ isBuyTicketOpened: true })}
                 buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
                 title='Buy Tickets'/>
               </View>
@@ -680,6 +729,29 @@ class Main extends React.Component {
           </View>
         </ScrollView>
         </View>
+        {/* BuyTicket Modal */}
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.isBuyTicketOpened}
+          onRequestClose={() => {
+            alert('Modal has been closed.');
+          }}>
+        <View style={{ width: width, height: height, backgroundColor: 'white'}}>
+          <View style={styles.buyTicketHeader}>
+            <Text style={styles.buyTicketHeaderText}>OOPS!</Text>
+          </View>
+          <View style={styles.buyTicketContent}>
+            <Text style={styles.center1}>We are working on our ticket</Text>
+            <Text style={styles.center2}>booking feature. We will let</Text> 
+            <Text style={styles.center3}>you know when it's ready</Text>
+          </View>
+          <Button
+                onPress={() => this.setState({ isBuyTicketOpened: false })}
+                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50, marginTop: 100, marginLeft: 80, marginRight: 80,}}
+                title='Okay, Got it'/>
+        </View>
+        </Modal>
       </Swiper>
       { !this.state.cameraModal
             ?  <View style={styles.camContainer}>{content}</View>
@@ -693,7 +765,6 @@ class Main extends React.Component {
                 title='Awesome, got it!'/>
              </View>
           }
-     
     </Swiper>
     )
    }
@@ -808,13 +879,42 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',               // Change default font
   },
   //no data in list on Now text
-  center: {
+  emptyRow: {
+    top: 50,
+    height: 150,
+  },
+  center1: {
+    //top: 50,
     color: '#909090', 
     fontFamily: 'Avenir',
-    fontSize: 16, 
+    fontSize: 18, 
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
-    padding: 20,
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
+  },
+  center2: {
+    //top: 50,
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 18, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
+  },
+  center3: {
+    //top: 50,
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 18, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
   },
   usernameS: {
     marginTop: 'auto', 
@@ -837,6 +937,21 @@ const styles = StyleSheet.create({
   },
   pb10: {
     bottom: 20
+  },
+  // Buy Ticket Screen
+  buyTicketHeader: {
+    marginTop: height/3,
+  },
+  buyTicketHeaderText: {
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    fontSize: 28,                       // Bigger font size
+    fontFamily: 'katanas-edge',
+    color: 'black'
+  },
+  buyTicketContent: {
+    marginTop: 70,
   },
   // title
   title: {
