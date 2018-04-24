@@ -140,7 +140,7 @@ class VideoComponent extends React.Component{
 
     // Post video if user in location, otherwise rendering Oops screen.
     const distanceResult = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: this.props.currentVenue.place.location.longitude, lat: this.props.currentVenue.place.location.latitude }, 1);
-    if (distanceResult) {
+    if ( this.props.currentVenue.isEventOn && distanceResult) {
       this.props.startUniversalLoading();
       postToEvent(this.props.currentVenue);
       console.log('Posted--->');
