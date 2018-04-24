@@ -553,12 +553,15 @@ class Main extends React.Component {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
     ? <CameraC 
+    currentVenue = {this.state.currentVenue}
     refreshMainC={this.refreshMainC} 
     usernameC={this.state.username}/>
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
+    venue.length == 0 ? venue = [{"eventName": "exception"}] : venue = this.state.venue;
+    // You can uncomment below line to do test empty OnNow list
     //venue = [{"eventName": "exception"}];
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded || !venue) {
       return (

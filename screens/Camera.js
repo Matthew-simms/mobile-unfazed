@@ -24,7 +24,7 @@ class CameraC extends React.Component{
       )
     } else if (videoReducer === 'Video') {
       return (
-        <View style={{flex: 1}}>{<VideoComponent refreshMainC={this.refreshMainC} />}</View>
+        <View style={{flex: 1}}>{<VideoComponent currentVenue={this.props.currentVenue} refreshMainC={this.refreshMainC} />}</View>
       )
     } else {
       return <View />
