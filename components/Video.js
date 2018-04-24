@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, Modal, Dimensions, StyleSheet } from 'react-native';
+import { Button } from 'react-native-elements'
 import { Video, Location, Permissions, Constants } from 'expo';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
@@ -8,6 +9,7 @@ import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { camOrVid, startUniversalLoading, stopUniversalLoading } from '../actions';
 
+const { width, height } = Dimensions.get('window');
 class VideoComponent extends React.Component{
 
   constructor(props) {
@@ -18,6 +20,7 @@ class VideoComponent extends React.Component{
       isSending: false,
       playVideo: true,
       notAtLoc: false,
+      isNearBy: false,
     };
   }
 
@@ -132,14 +135,15 @@ class VideoComponent extends React.Component{
     }
 
     // uncomment to be able to post into 4th list event
-    arr[3].place.location.longitude = location.coords.longitude;
-    arr[3].place.location.latitude = location.coords.latitude;
+    // arr[3].place.location.longitude = location.coords.longitude;
+    // arr[3].place.location.latitude = location.coords.latitude;
 
 
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].isEventOn) {
         //searching within 1km
         const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
+        this.setState({ isNearBy: true });
         console.log('checking location', result);
         if (result) {
           this.props.startUniversalLoading();
@@ -224,10 +228,84 @@ class VideoComponent extends React.Component{
             <Text style={{color: 'white', padding: 2, alignSelf: 'center'}}>Post Video</Text>
           </TouchableOpacity>
         </View>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.isNearBy}
+          onRequestClose={() => {
+            alert('Modal has been closed.');
+          }}>
+        <View style={{ width: width, height: height, backgroundColor: 'white'}}>
+          <View style={styles.buyTicketHeader}>
+            <Text style={styles.buyTicketHeaderText}>OOPS!</Text>
+          </View>
+          <View style={styles.buyTicketContent}>
+            <Text style={styles.center1}>You're not at a music event</Text>
+            <Text style={styles.center2}>try film when you are at</Text> 
+            <Text style={styles.center3}>one :D</Text>
+          </View>
+          <Button
+                onPress={() => this.setState({ isNearBy: false })}
+                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50, marginTop: 100, marginLeft: 80, marginRight: 80,}}
+                title='Okay, Got it'/>
+        </View>
+        </Modal>
       </View>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  center1: {
+    //top: 50,
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 18, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
+  },
+  center2: {
+    //top: 50,
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 18, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
+  },
+  center3: {
+    //top: 50,
+    color: '#909090', 
+    fontFamily: 'Avenir',
+    fontSize: 18, 
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    paddingRight: 50,
+    paddingLeft: 50,
+  },
+  // Buy Ticket Screen
+  buyTicketHeader: {
+    marginTop: height/3,
+  },
+  buyTicketHeaderText: {
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
+    fontSize: 28,                       // Bigger font size
+    fontFamily: 'katanas-edge',
+    color: 'black'
+  },
+  buyTicketContent: {
+    marginTop: 70,
+  },
+  }
+);
 
 const mapStateToProps = state => {
   return state;
