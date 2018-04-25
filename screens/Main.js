@@ -601,6 +601,13 @@ class Main extends React.Component {
                 buttonStyle={[styles.button, styles.btnWidth100, styles.btmRightBtn]}
                 onPress={this.signOutUser.bind(this)}
                 />
+              {/* <Button
+                color={ "#6600EC" }
+                title={ 'Privacy Policy' }
+                rounded
+                buttonStyle={[styles.button, styles.btnWidth100,]}
+                onPress={this.signOutUser.bind(this)}
+                /> */}
             </ImageBackground>
           {/* </View> */}
         </View>
