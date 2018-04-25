@@ -135,8 +135,8 @@ class VideoComponent extends React.Component{
     }
 
     // uncomment to be able to post into 4th list event
-    arr[3].place.location.longitude = location.coords.longitude;
-    arr[3].place.location.latitude = location.coords.latitude;
+    // arr[3].place.location.longitude = location.coords.longitude;
+    // arr[3].place.location.latitude = location.coords.latitude;
 
     // Post video if user in location, otherwise rendering Oops screen.
     // const distanceResult = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: this.props.currentVenue.place.location.longitude, lat: this.props.currentVenue.place.location.latitude }, 1);

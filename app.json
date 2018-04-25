@@ -4,7 +4,8 @@
     "facebookScheme": "fb1972286079755935",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "cover"
+      "resizeMode": "cover",
+      "privacy": "unlisted"
     }
   }
 }
