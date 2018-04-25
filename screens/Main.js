@@ -743,7 +743,7 @@ class Main extends React.Component {
             ?  <View style={styles.camContainer}>{content}</View>
               :
               <View style={styles.modal}>
-              <Text style={[styles.text]}>Film when you are at a music event</Text> 
+              <Text style={[styles.text]}>Tap and hold the record button to film when you are at a music event</Text> 
               <Button
                 onPress={this.toggleCamModal.bind(this)}
                 color={ "#6600EC" }
