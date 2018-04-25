@@ -108,16 +108,16 @@ class Main extends React.Component {
      */
     // GET all events currently on in London
     const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-    console.log(allEventsRequest.data.payload)
+    console.log('AllEventsRequest', allEventsRequest.data.payload)
     this.noVenueData(allEventsRequest)
 
-    // console.log(venueRequest.data.payload[0].place.name)
-    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[1].eventId)
-    .catch(function(error) {
-      console.log(error.message);
-        throw error;
-      })
-    console.log(videoRequest.data.payload[0])
+try {
+    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[0].eventId)
+    } catch (error) {
+      throw new Error('This error was thrown in videoRequest')
+      if (error) { 
+      }
+    }
     this.noVideoData(videoRequest)
 
     // GET upcoming events in London
@@ -208,6 +208,7 @@ class Main extends React.Component {
   }
 
   noVideoData(videoRequest) {
+    console.log('no video data', videoRequest)
     // check if there is data if none goto next venue
     if (videoRequest.data.payload.length == 0) {
       let nextVenue = null;
