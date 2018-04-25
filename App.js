@@ -7,7 +7,7 @@ import RootNavigation from './navigation/RootNavigation';
 import { Font, AppLoading } from 'expo';
 import reducers from './reducers';
 import cacheAssetsAsync from './helpers/cachedAssetAsync'
-import { Constants } from 'expo'
+import { Constants, Segment } from 'expo'
 
 
 console.log(Constants.isDevice) 
@@ -45,7 +45,17 @@ export default class App extends React.Component {
       this.setState({ fontLoaded: true, isReady: true  });
     };
   
-
+    componentWillMount() {
+      const iosWriteKey = 'ECEf7KT3PwB6KM3M4LXPLY2BsHcYieVY';
+      const androidWriteKey = 'oB4p8r06XYizIZExS4j2iHA0AIqwLxTV';
+      const userId = '3WP15cvWbn';
+      Segment.initialize({ androidWriteKey, iosWriteKey });
+      Segment.identify(userId);
+      Segment.track('Test track-->');
+      Segment.screen('Main');
+      Segment.screen('Login');
+      Segment.screen('WalThrough');
+    }
     render() {
       if ( !this.state.isReady ) {
         return (
