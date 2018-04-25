@@ -426,7 +426,7 @@ class Main extends React.Component {
 
   async refreshMainC() {
     console.log('Called to refresh');
-    await this.componentDidMount();
+    await this.forceUpdate();
   }
 
   _renderSectionHeader = ({section}) => {
@@ -454,34 +454,7 @@ class Main extends React.Component {
               tension={0}
               friction={3}
             >
-              { !item.upcomingEvent
-                ? <View style={ styles.elevationLow } borderRadius={9} > 
-                    <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
-                        <LinearGradient
-                              colors={ item.gradient_colors}
-                              start={[0.1,0.1]}
-                              end={[0.5,0.5]}
-                              style={{ padding: 20, borderRadius: 9 }}>
-                            <View style={ styles.listBackground }>
-                              <Text style={[styles.text, styles.red]}>On Now</Text>
-                              <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
-                              <Text style={[styles.text]}>@ {item.place.name}</Text>
-                                <View style={styles.imageRow}>
-                                  {this.UiPrinter(item.uiFaces.payload)}
-                                  <Text style={styles.text}>{item.videoCount} Videos</Text>
-                                </View> 
-                            </View>
-                            <Button
-                              onPress={this._onRowPress.bind(this, item)}
-                              color={ "#6600EC" }
-                              title={ 'Play' }
-                              rounded
-                              buttonStyle={[styles.button, styles.btmRightBtn]}
-                            />
-                        </LinearGradient>
-                      </ImageBackground>
-                    </View> 
-                : <View style={ styles.elevationLow } borderRadius={9} > 
+             <View style={ styles.elevationLow } borderRadius={9} > 
                     <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
                       <View style={[styles.listBackground, styles.paddingBg]}>
                               <Text style={[styles.text, styles.red]}>Upcoming</Text>
@@ -497,10 +470,10 @@ class Main extends React.Component {
                             />
                     </ImageBackground>
                   </View>
-              }
             </TouchableScale>
   )
   _renderOnNowItem = ({item, section}) => (
+    section.length == 0 ? false :
     item.eventName == "exception"
     ? 
     <View style={ styles.emptyRow } borderRadius={9} > 
@@ -522,7 +495,7 @@ class Main extends React.Component {
               <View style={ styles.elevationLow } borderRadius={9} > 
                     <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
-                              colors={ item.gradient_colors}
+                              colors={ !item.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : item.gradient_colors}
                               start={[0.1,0.1]}
                               end={[0.5,0.5]}
                               style={{ padding: 20, borderRadius: 9 }}>
@@ -531,7 +504,7 @@ class Main extends React.Component {
                               <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
                               <Text style={[styles.text]}>@ {item.place.name}</Text>
                                 <View style={styles.imageRow}>
-                                  {this.UiPrinter(item.uiFaces.payload)}
+                                  {item.uiFaces.payload ? this.UiPrinter(item.uiFaces.payload): null}
                                   <Text style={styles.text}>{item.videoCount} Videos</Text>
                                 </View> 
                             </View>
@@ -560,9 +533,12 @@ class Main extends React.Component {
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
-    venue.length == 0 ? venue = [{"eventName": "exception"}] : venue = this.state.venue;
+    if(venue.length == 0 || venue == null) {
+      venue = [];
+    } 
     // You can uncomment below line to do test empty OnNow list
     //venue = [{"eventName": "exception"}];
+    console.log('Vene--->', venue);
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded || !venue) {
       return (
         <View style={this.viewStyle()}>

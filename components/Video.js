@@ -118,7 +118,7 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientDate = new Date();
           response.body.postResponse.clientEventId = event.eventId;
           response.body.postResponse.clientUsername = this.props.UserData.username
-          const transcodeVideo = await axios.get('http://192.168.1.127:5000/v1/videoTranscoder?q=' + JSON.stringify(response.body));
+          const transcodeVideo = await axios.get('https://concertly-app.herokuapp.com/v1/videoTranscoder?q=' + JSON.stringify(response.body));
 
           console.log('response', response);
           console.log('transcode', transcodeVideo);
@@ -148,7 +148,7 @@ class VideoComponent extends React.Component{
     //   this.setState({ isNearBy: true });  
     //   console.log('Post failed due to location');
     // }
-    let eventNearOn = false;
+    let eventNearOn = 0;
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].isEventOn) {
         //searching within 1km
@@ -157,15 +157,14 @@ class VideoComponent extends React.Component{
         if (result) {
           this.props.startUniversalLoading();
           postToEvent(arr[i]);
-          eventNearOn = true;
+          eventNearOn ++;
         } 
         else {
           this.setState({ notAtLoc: true });
-          eventNearOn = false;
         }
       }
     }
-    if (!eventNearOn) {
+    if (eventNearOn == 0) {
       this.setState({ isNearBy: true });
     }
     console.log('hi');
