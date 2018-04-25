@@ -1,7 +1,7 @@
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo';
+import { LinearGradient, Font } from 'expo';
 import AppIntroSlider from 'react-native-app-intro-slider';
 
 const { width, height } = Dimensions.get('window');
@@ -10,30 +10,20 @@ const slides = [
   {
     key: 'somethun',
     title: 'Browse events that are happening right now',
-    text: 'View events that are currently on in London and the best upcoming gigs',
-    icon: 'ios-images-outline',
-    colors: ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
+    image: require('../assets/images/Slide_1_icon.png'),
+    colors: ['#FFFFFF', '#FFFFFF'],
   },
   {
     key: 'somethun1',
-    title: 'Watch live videos',
-    text: 'From your favourite club nights and music events',
-    icon: 'ios-options-outline',
-    colors: ['#A3A1FF', '#3A3897'],
+    title: 'Watch live videos from the best nightclubs and music venues',
+    image: require('../assets/images/slide_2_icon.png'),
+    colors: ['#FFFFFF', '#FFFFFF'],
   },
   {
     key: 'somethun2',
-    title: 'See what interests you',
-    text: 'After seeing a gig you like, you can go to the venue and experience the what you just watched on your phone!',
-    icon: 'ios-beer-outline',
-    colors: ['#29ABE2', '#4F00BC'],
-  },
-  {
-    key: 'somethun3',
-    title: 'Film and contribute',
-    text: 'While at a gig film parts of the show to share with everyone',
-    icon: 'ios-beer-outline',
-    colors: ['#29ABE2', '#4F00BC'],
+    title: 'Goto the event and film to contribute for friends and others to see!',
+    image: require('../assets/images/slide_3_icon.png'),
+    colors: ['#FFFFFF', '#FFFFFF'],
   },
 ];
 
@@ -58,11 +48,11 @@ export default class Walk extends React.Component {
       colors={props.colors}
       start={{x: 0, y: .1}} end={{x: .1, y: 1}}
     >
-      <Ionicons style={{ backgroundColor: 'transparent' }} name={props.icon} size={200} color="white" />
-      <View>
-        <Text style={styles.title}>{props.title}</Text>
-        <Text style={styles.text}>{props.text}</Text>
-      </View>
+    <View>
+      <Text style={styles.title}>{props.title}</Text>
+      {/* <Text style={styles.text}>{props.text}</Text> */}
+    </View>
+    <Image style={styles.image} source={props.image}/>
     </LinearGradient>
   );
 
@@ -83,7 +73,7 @@ export default class Walk extends React.Component {
               });
             }} >
             <View style={ styles.outlineBtnWhite  }>
-             <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Signup</Text>
+             <Text style={{ fontSize: 16, fontFamily: 'opensans', fontWeight: 'bold', color: 'rgba(141,0,143,100)', backgroundColor: 'rgba(255,255,255,0)' }}>Signup</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -93,8 +83,8 @@ export default class Walk extends React.Component {
                 fromWalkThrough: 'LOGIN',
               });
             }} >
-            <View style={ styles.outlineBtnWhite }>
-            <Text style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0)' }}>Login</Text>
+            <View style={ styles.secondaryBtn }>
+            <Text style={{ fontSize: 16, fontFamily: 'opensans', fontWeight: 'bold', color: 'rgba(141,0,143,100)', backgroundColor: 'rgba(255,255,255,0)' }}>Login</Text>
             </View>
           </TouchableOpacity>
 
@@ -108,6 +98,8 @@ export default class Walk extends React.Component {
           onDone={(e) => this._handleLoginDone(e, this)}
           hideNextButton
           hideDoneButton
+          activeDotColor='rgba(187, 187, 187, 100)'
+          dotColor='rgba(216, 216, 216, 100)'
           onSkip={() => console.log("skipped")}
         />
       </View>
@@ -125,6 +117,11 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
   },
+  image: {
+    width: 310,
+    height: 320,
+    marginBottom: 40,
+  },
   text: {
     color: 'rgba(255, 255, 255, 0.8)',
     backgroundColor: 'transparent',
@@ -132,11 +129,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   title: {
-    fontSize: 22,
-    color: 'white',
+    fontSize: 20,
+    color: 'rgba(44, 44, 44, 100)',
     backgroundColor: 'transparent',
     textAlign: 'center',
-    marginBottom: 16,
+    padding: 30,
+    fontFamily: 'opensans',
   },
   buttonRow: {
     position: 'absolute', 
@@ -153,9 +151,19 @@ const styles = StyleSheet.create({
     zIndex: 3,
     marginRight: 5,
     flex: 1,
-    borderWidth: 2,
-    borderColor: 'white',
+    backgroundColor: 'rgba(237,237,237,100)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 50,
+  },
+  secondaryBtn: {
+    width: width/2 -10,
+    zIndex: 3,
+    marginRight: 5,
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 50,
   }
 });
