@@ -108,17 +108,9 @@ class Main extends React.Component {
      */
     // GET all events currently on in London
     const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-    console.log('AllEventsRequest', allEventsRequest.data.payload)
-    this.noVenueData(allEventsRequest)
+    //console.log('AllEventsRequest', allEventsRequest.data.payload)
 
-try {
-    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[0].eventId)
-    } catch (error) {
-      throw new Error('This error was thrown in videoRequest')
-      if (error) { 
-      }
-    }
-    this.noVideoData(videoRequest)
+    //this.noVenueData(allEventsRequest)
 
     // GET upcoming events in London
     const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
@@ -128,9 +120,28 @@ try {
     })
     console.log(upcomingEventsRequest.data.payload)
 
+    let videoRequest = [];
+    if(allEventsRequest.data.payload.length == 0) {
+      try {
+        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=1760654334228641' + upcomingEventsRequest.data.payload[0].eventId)
+        } catch (error) {
+          console.log(error);
+      }
+      this.setState({
+        isVenueLoading: false,
+      });
+    } else {
+      try {
+        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[0].eventId)
+        } catch (error) {
+          console.log(error);
+      }
+    }
+    this.noVideoData(videoRequest);    
+
     this.setState({
-      venue: allEventsRequest.data.payload,
-      currentVenue: allEventsRequest.data.payload[0],
+      venue: allEventsRequest.data.payload.length == 0 ? [{"eventName": "exception"}] : allEventsRequest.data.payload,
+      currentVenue: allEventsRequest.data.payload.length == 0 ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload.length[0],
       videos: videoRequest.data.payload,
       upcomingEvents : upcomingEventsRequest.data.payload,
       selectedVenueIndex: 0,
@@ -535,7 +546,7 @@ try {
 
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
     if(venue.length == 0 || venue == null) {
-      venue = [];
+      venue = [{"eventName": "exception"}];
     } 
     // You can uncomment below line to do test empty OnNow list
     //venue = [{"eventName": "exception"}];
@@ -564,7 +575,7 @@ try {
                 {
                   data: venue,
                   title: 'On Now',
-                  renderItem:  this._renderOnNowItem,
+                  renderItem:  venue.length > 0 ? this._renderOnNowItem: this._renderEmpty,
                   keyExtractor: item => item.id,
                   ListEmptyComponent: this._renderEmpty
                 },
@@ -871,37 +882,28 @@ const styles = StyleSheet.create({
     height: 150,
   },
   center1: {
-    //top: 50,
     color: '#909090', 
     fontFamily: 'Avenir',
     fontSize: 18, 
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
-    paddingRight: 50,
-    paddingLeft: 50,
   },
   center2: {
-    //top: 50,
     color: '#909090', 
     fontFamily: 'Avenir',
     fontSize: 18, 
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
-    paddingRight: 50,
-    paddingLeft: 50,
   },
   center3: {
-    //top: 50,
     color: '#909090', 
     fontFamily: 'Avenir',
     fontSize: 18, 
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
-    paddingRight: 50,
-    paddingLeft: 50,
   },
   usernameS: {
     marginTop: 'auto', 
