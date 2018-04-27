@@ -123,7 +123,7 @@ class Main extends React.Component {
     let videoRequest = [];
     if(allEventsRequest.data.payload.length == 0) {
       try {
-        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=1760654334228641' + upcomingEventsRequest.data.payload[0].eventId)
+        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + upcomingEventsRequest.data.payload[0].eventId)
         } catch (error) {
           console.log(error);
       }
