@@ -140,8 +140,8 @@ class Main extends React.Component {
     this.noVideoData(videoRequest);    
 
     this.setState({
-      venue: allEventsRequest.data.payload.length == 0 ? [{"eventName": "exception"}] : allEventsRequest.data.payload,
-      currentVenue: allEventsRequest.data.payload.length == 0 ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload.length[0],
+      venue: allEventsRequest.data.payload,
+      currentVenue: allEventsRequest.data.payload.length == 0 ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload[0],
       videos: videoRequest.data.payload,
       upcomingEvents : upcomingEventsRequest.data.payload,
       selectedVenueIndex: 0,
@@ -149,7 +149,7 @@ class Main extends React.Component {
       vidLink: videoRequest.data.payload[0].instaVideoLink,
       isVenueLoading: false,
     });
-    console.log(this.state.currentVenue)
+    console.log('Current venue', this.state.currentVenue)
     await this.getUserFaces(allEventsRequest)
   }
 
