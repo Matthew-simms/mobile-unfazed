@@ -550,7 +550,8 @@ class Main extends React.Component {
     } 
     // You can uncomment below line to do test empty OnNow list
     //venue = [{"eventName": "exception"}];
-    console.log('Vene--->', venue);
+    // console.log('Vene--->', venue);
+
     if (this.state.isVenueLoading || !this.state.bgImgsLoaded || !venue) {
       return (
         <View style={this.viewStyle()}>
@@ -559,6 +560,7 @@ class Main extends React.Component {
       );
     }
     return (
+      console.log('now playing', videos[selectedVidIndex].instaVideoLink),
       <Swiper
       loop={false}
       showsPagination={false}
@@ -567,7 +569,7 @@ class Main extends React.Component {
       onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
-        <SectionList
+        <SectionList 
         renderItem={this._renderItem}
         renderSectionHeader={this._renderSectionHeader}
         stickySectionHeadersEnabled={false}
