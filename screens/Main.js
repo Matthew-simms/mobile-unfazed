@@ -560,7 +560,7 @@ class Main extends React.Component {
       );
     }
     return (
-      console.log('now playing', videos[selectedVidIndex].instaVideoLink),
+      // console.log('now playing', videos[selectedVidIndex].instaVideoLink),
       <Swiper
       loop={false}
       showsPagination={false}

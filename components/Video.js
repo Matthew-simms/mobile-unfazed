@@ -151,8 +151,8 @@ class VideoComponent extends React.Component{
     let eventNearOn = 0;
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].isEventOn) {
-        //searching within 1km
-        const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 1);
+        //searching within 0.2km
+        const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 0.2);
         console.log('checking location', result);
         if (result) {
           this.props.startUniversalLoading();
