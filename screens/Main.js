@@ -110,6 +110,9 @@ class Main extends React.Component {
     const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
     //console.log('AllEventsRequest', allEventsRequest.data.payload)
 
+     // GET all events currently on in London with no videos - this is for location check for camera recording
+     const allEventzRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/alleventz/uk?q=London')
+
     //this.noVenueData(allEventsRequest)
 
     // GET upcoming events in London
@@ -141,6 +144,7 @@ class Main extends React.Component {
 
     this.setState({
       venue: allEventsRequest.data.payload,
+      locCheckData: allEventzRequest.data.payload,
       currentVenue: allEventsRequest.data.payload.length == 0 ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload[0],
       videos: videoRequest.data.payload,
       upcomingEvents : upcomingEventsRequest.data.payload,
@@ -202,8 +206,8 @@ class Main extends React.Component {
       venue: arr,
       data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
     }))
-    this.props.storeEventData(arr.concat(this.state.upcomingEvents));
-    console.log(this.state.venue)
+    this.props.storeEventData(this.state.locCheckData);
+    console.log('loc check data', this.state.locCheckData)
     console.log("RAW concat data", this.state.data)
     console.log('testData', this.state)
   }
