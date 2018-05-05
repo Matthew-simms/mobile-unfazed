@@ -94,12 +94,12 @@ class auth extends React.Component {
 
   async loginWithFacebook() {
     this.setState({ error: '', loading: true });
-    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('1972286079755935', { permissions: ['public_profile'] })
+    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('1972286079755935', { permissions: ['public_profile', 'email'] })
 
     if (type == 'success') {
     // Get user's name using the FB Graph API
     const response = await fetch(
-        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`)
+        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large),email`)
         const userInfo = await response.json()
         this.setState({ userInfo })
         this.props.onLoginFB(this.state.userInfo)
