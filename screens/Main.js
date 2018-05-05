@@ -60,7 +60,7 @@ class Main extends React.Component {
       isLoading: true,
       fontLoaded: false,
       bgImgsLoaded: false,
-      playVideo: true,
+      playVideo: false,
       photoURL: '',
       signupModal: this.props.UserData.modal,
       cameraModal: this.props.UserData.modal,
@@ -76,7 +76,7 @@ class Main extends React.Component {
   async componentDidMount() {
 
     StatusBar.setHidden(true)
-   
+
     var currentUser
     var that = this
     listener = firebase.auth().onAuthStateChanged(function (user) {
@@ -93,13 +93,13 @@ class Main extends React.Component {
       listener();
     });
     // this._notificationSubscription = Notifications.addListener(this._handleNotification);
-    
+
     // Camera Permisisons
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ permissionsGranted: status === 'granted' });
 
     console.log(this.props.modal)
-    
+
     // pause video if user has signed in
     /*
      * http://localhost:5000/v1/venues/search/uk?q=London&o=2
@@ -140,7 +140,7 @@ class Main extends React.Component {
           console.log(error);
       }
     }
-    this.noVideoData(videoRequest);    
+    this.noVideoData(videoRequest);
 
     this.setState({
       venue: allEventsRequest.data.payload,
@@ -288,9 +288,9 @@ class Main extends React.Component {
 
     // POST the token to our backend so we can use it to send pushes from there
     var updates = {}
-    updates['/expoToken'] = token 
+    updates['/expoToken'] = token
     await firebase.database().ref('/users/' + currentUser.uid).update(updates)
-    //call the push notification 
+    //call the push notification
   }
 
   _onRowPress = ( rowData ) => {
@@ -318,7 +318,7 @@ class Main extends React.Component {
       videos: videoRequest.data.payload,
       selectedVidIndex: 0,
       isLoading: false
-    }));     
+    }));
     this.noVideoData(videoRequest);
   }
 
@@ -334,9 +334,9 @@ class Main extends React.Component {
   _playbackCallback(playbackStatus) {
     if (playbackStatus.isLoaded) {
       this.setState({
-        playbackInstancePosition:  playbackStatus.positionMillis, 
+        playbackInstancePosition:  playbackStatus.positionMillis,
         playbackInstanceDuration:  playbackStatus.durationMillis,
-        playbackSeconds: Math.round(((playbackStatus.positionMillis / 1000) % 60)), 
+        playbackSeconds: Math.round(((playbackStatus.positionMillis / 1000) % 60)),
         countdown : 100 - Math.floor((this.state.playbackInstancePosition / this.state.playbackInstanceDuration)*100),
         shouldPlay: playbackStatus.shouldPlay,
         isPlaying: playbackStatus.isPlaying,
@@ -457,7 +457,7 @@ class Main extends React.Component {
   _renderEmpty () {
         <Text style={[styles.center]}>No events on right now, come back and check later or view some upcoming events below</Text>
   }
-  
+
 
   _renderItem = ({item, section}) => (
     <TouchableScale
@@ -470,7 +470,7 @@ class Main extends React.Component {
               tension={0}
               friction={3}
             >
-             <View style={ styles.elevationLow } borderRadius={9} > 
+             <View style={ styles.elevationLow } borderRadius={9} >
                     <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
                       <View style={[styles.listBackground, styles.paddingBg]}>
                               <Text style={[styles.text, styles.red]}>Upcoming</Text>
@@ -491,12 +491,12 @@ class Main extends React.Component {
   _renderOnNowItem = ({item, section}) => (
     section.length == 0 ? false :
     item.eventName == "exception"
-    ? 
-    <View style={ styles.emptyRow } borderRadius={9} > 
+    ?
+    <View style={ styles.emptyRow } borderRadius={9} >
       <Text style={styles.center1}>No events on right now, come back</Text>
-      <Text style={styles.center2}>and check later or view some</Text> 
+      <Text style={styles.center2}>and check later or view some</Text>
       <Text style={styles.center3}>upcoming events below</Text>
-    </View> 
+    </View>
     :
     <TouchableScale
               // Pass row style
@@ -508,7 +508,7 @@ class Main extends React.Component {
               tension={0}
               friction={3}
             >
-              <View style={ styles.elevationLow } borderRadius={9} > 
+              <View style={ styles.elevationLow } borderRadius={9} >
                     <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
                               colors={ !item.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : item.gradient_colors}
@@ -522,7 +522,7 @@ class Main extends React.Component {
                                 <View style={styles.imageRow}>
                                   {item.uiFaces.payload ? this.UiPrinter(item.uiFaces.payload): null}
                                   <Text style={styles.text}>{item.videoCount} Videos</Text>
-                                </View> 
+                                </View>
                             </View>
                             {item.eventName != this.state.currentVenue.eventName ?
                             <Button
@@ -534,16 +534,16 @@ class Main extends React.Component {
                             />: <TouchableOpacity style={{ position: 'absolute', bottom: 30, right: 40 }}><Text style={{ color: 'white', fontSize: 18,}}>Playing</Text></TouchableOpacity>}
                         </LinearGradient>
                       </ImageBackground>
-                    </View> 
+                    </View>
             </TouchableScale>
   )
-  
+
   render() {
     // Camera show state
     const cameraScreenContent = this.state.permissionsGranted
-    ? <CameraC 
+    ? <CameraC
     currentVenue = {this.state.currentVenue}
-    refreshMainC={this.refreshMainC} 
+    refreshMainC={this.refreshMainC}
     usernameC={this.state.username}/>
     : this.renderNoPermissions();
     const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
@@ -551,7 +551,7 @@ class Main extends React.Component {
     let {selectedVidIndex, videos, selectedVenueIndex, venue, ended, noEvents, currentVenue, venueBefore, hasCameraPermission, playVideo, ListData} = this.state;
     if(venue.length == 0 || venue == null) {
       venue = [{"eventName": "exception"}];
-    } 
+    }
     // You can uncomment below line to do test empty OnNow list
     //venue = [{"eventName": "exception"}];
     // console.log('Vene--->', venue);
@@ -573,7 +573,7 @@ class Main extends React.Component {
       onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
-        <SectionList 
+        <SectionList
         renderItem={this._renderItem}
         renderSectionHeader={this._renderSectionHeader}
         stickySectionHeadersEnabled={false}
@@ -593,7 +593,7 @@ class Main extends React.Component {
                   // ListEmptyComponent: this._renderEmpty
                 }
               ]}
-             /> 
+             />
       </View>
       <Swiper
         horizontal={false}
@@ -610,7 +610,7 @@ class Main extends React.Component {
                 { this.state.photoURL ?
                 <Image style={styles.profileImg} source={{uri: this.state.photoURL}}/>
                 :<Image style={styles.profileImg} source={require('../assets/images/Profile_avatar_placeholder.png')}/>}
-                <Text style={[styles.profileName]}>{this.props.UserData.username}</Text> 
+                <Text style={[styles.profileName]}>{this.props.UserData.username}</Text>
              </View>
              <Button
                 color={ "#6600EC" }
@@ -632,12 +632,12 @@ class Main extends React.Component {
         <View style={this.viewStyle()}>
           { !this.state.signupModal
             ? <View style={{ backgroundColor: 'rgba(0,0,0,0.8)', display: 'none'}}>
-                <Text style={[styles.text]}>test</Text> 
+                <Text style={[styles.text]}>test</Text>
               </View>
               :
               <View style={styles.modal}>
                <Image style={{marginBottom:20}} source={ require('../assets/images/nav-tute.png') } />
-              <Text style={[styles.text]}>Swipe up, down, left and right to navigate</Text> 
+              <Text style={[styles.text]}>Swipe up, down, left and right to navigate</Text>
               <Button
                 onPress={this.toggleModal.bind(this)}
                 color={ "#6600EC" }
@@ -645,7 +645,7 @@ class Main extends React.Component {
                 title='Okay, got it!'/>
              </View>
           }
-          { videos[selectedVidIndex] ? 
+          { videos[selectedVidIndex] ?
           <TouchableOpacity
            onPress={(e) => this._nextVideo(e, this)}
            activeOpacity={0.7}
@@ -660,21 +660,21 @@ class Main extends React.Component {
                 <Text style={[styles.text, styles.usernameS]}>{videos[selectedVidIndex].userName}</Text>
               </View>
               <View style={{ backgroundColor: 'rgba(255,255,255,0)',
-                            position: 'absolute', 
+                            position: 'absolute',
                             zIndex: 2,
                             height: 80,
-                            left: 0, 
-                            top: height - 90, 
+                            left: 0,
+                            top: height - 90,
                             width: width,
                             padding: 10,
                             overflow: 'hidden'
                             }} >
-                <Text style={[styles.text, styles.red]}>On Now</Text> 
+                <Text style={[styles.text, styles.red]}>On Now</Text>
                 {/* Title */}
                 <Text style={[styles.title]}>{currentVenue.eventName}</Text>
                 {/* Venue Name */}
-                <Text style={[styles.text]}>{currentVenue.place.name}</Text> 
-              </View> 
+                <Text style={[styles.text]}>{currentVenue.place.name}</Text>
+              </View>
               <Video
                 source={{ uri: videos[selectedVidIndex].instaVideoLink }}
                 onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
@@ -722,8 +722,8 @@ class Main extends React.Component {
               <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
                 <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
                 <View style={{flexDirection: 'column'}}>
-                  <Text style={[styles.text, styles.blk]}>Currently playing video by</Text> 
-                  <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text> 
+                  <Text style={[styles.text, styles.blk]}>Currently playing video by</Text>
+                  <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text>
                 </View>
               </View>
               : null
@@ -747,7 +747,7 @@ class Main extends React.Component {
           </View>
           <View style={styles.buyTicketContent}>
             <Text style={styles.center1}>We are working on our ticket</Text>
-            <Text style={styles.center2}>booking feature. We will let</Text> 
+            <Text style={styles.center2}>booking feature. We will let</Text>
             <Text style={styles.center3}>you know when it's ready</Text>
           </View>
           <Button
@@ -761,7 +761,7 @@ class Main extends React.Component {
             ?  <View style={styles.camContainer}>{content}</View>
               :
               <View style={styles.modal}>
-              <Text style={[styles.text]}>Tap and hold the record button to film when you are at a music event</Text> 
+              <Text style={[styles.text]}>Tap and hold the record button to film when you are at a music event</Text>
               <Button
                 onPress={this.toggleCamModal.bind(this)}
                 color={ "#6600EC" }
@@ -825,7 +825,7 @@ const styles = StyleSheet.create({
     height: screen.height / 5,          // Divide screen height by 3
   },
   paddingBg : {
-    padding: 20, 
+    padding: 20,
     borderRadius: 9,
   },
   // container for the button for upcoming
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: { width: 9, height: 7 },
         shadowOpacity: 0.4,
-        shadowRadius: 10,    
+        shadowRadius: 10,
       },
       android: {
         elevation: 5,
@@ -888,32 +888,32 @@ const styles = StyleSheet.create({
     height: 150,
   },
   center1: {
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
   },
   center2: {
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
   },
   center3: {
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
   },
   usernameS: {
-    marginTop: 'auto', 
-    marginBottom: 'auto', 
+    marginTop: 'auto',
+    marginBottom: 'auto',
     marginLeft: 5
   },
   // black
@@ -991,8 +991,8 @@ const styles = StyleSheet.create({
   },
   //
   btmRightBtn: {
-    position: "absolute", 
-    bottom: 0, 
+    position: "absolute",
+    bottom: 0,
     right: 0,
   },
   // button width longer
@@ -1004,21 +1004,21 @@ const styles = StyleSheet.create({
     height: 34,
     width: 34,
     borderRadius: 17,
-    marginLeft: -10,  
+    marginLeft: -10,
   },
    // Profile image
    profileImg: {
     height: 100,
     width: 100,
-    borderRadius: 50, 
+    borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#fff' 
+    borderColor: '#fff'
   },
   // UI faces row
   imageRow: {
     flexDirection: 'row',
-    position: "absolute", 
-    bottom: 0, 
+    position: "absolute",
+    bottom: 0,
     right: 0,
     paddingBottom: 40
   },

@@ -84,6 +84,7 @@ class VideoComponent extends React.Component{
     }
 
     var postToEvent = (event) => {
+      //console.log(event);
       const file = {
         uri,
         name,
@@ -103,7 +104,7 @@ class VideoComponent extends React.Component{
         if (response.status !== 201) {
             console.log(response);
         } else {
-        
+
         console.log('first response', response);
         this.props.stopUniversalLoading();
         this.props.refreshMainC();
@@ -117,7 +118,8 @@ class VideoComponent extends React.Component{
           response.body.postResponse.clientId = getRandomArbitrary(7000, 1000000);
           response.body.postResponse.clientDate = new Date();
           response.body.postResponse.clientEventId = event.eventId;
-          response.body.postResponse.clientUsername = this.props.UserData.username
+          response.body.postResponse.EventId = event.id;
+          response.body.postResponse.clientUsername = this.props.UserData.username;
           const transcodeVideo = await axios.get('https://concertly-app.herokuapp.com/v1/videoTranscoder?q=' + JSON.stringify(response.body));
 
           console.log('response', response);
@@ -135,8 +137,8 @@ class VideoComponent extends React.Component{
     }
 
     // uncomment to be able to post into 4th list event
-    // arr[3].place.location.longitude = location.coords.longitude;
-    // arr[3].place.location.latitude = location.coords.latitude;
+    //arr[3].place.location.longitude = location.coords.longitude;
+    //arr[3].place.location.latitude = location.coords.latitude;
 
     // Post video if user in location, otherwise rendering Oops screen.
     // const distanceResult = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: this.props.currentVenue.place.location.longitude, lat: this.props.currentVenue.place.location.latitude }, 1);
@@ -145,7 +147,7 @@ class VideoComponent extends React.Component{
     //   postToEvent(this.props.currentVenue);
     //   console.log('Posted--->');
     // } else {
-    //   this.setState({ isNearBy: true });  
+    //   this.setState({ isNearBy: true });
     //   console.log('Post failed due to location');
     // }
     let eventNearOn = 0;
@@ -158,7 +160,7 @@ class VideoComponent extends React.Component{
           this.props.startUniversalLoading();
           postToEvent(arr[i]);
           eventNearOn ++;
-        } 
+        }
         else {
           this.setState({ notAtLoc: true });
         }
@@ -171,7 +173,7 @@ class VideoComponent extends React.Component{
   }
 
   render() {
-    
+
     if (this.props.universalLoadingRed) {
       return (
         <View style={this.viewStyle()}>
@@ -254,7 +256,7 @@ class VideoComponent extends React.Component{
           </View>
           <View style={styles.buyTicketContent}>
             <Text style={styles.center1}>You're not at a music event</Text>
-            <Text style={styles.center2}>try film when you are at</Text> 
+            <Text style={styles.center2}>try film when you are at</Text>
             <Text style={styles.center3}>one :D</Text>
           </View>
           <Button
@@ -271,9 +273,9 @@ class VideoComponent extends React.Component{
 const styles = StyleSheet.create({
   center1: {
     //top: 50,
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
@@ -282,9 +284,9 @@ const styles = StyleSheet.create({
   },
   center2: {
     //top: 50,
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
@@ -293,9 +295,9 @@ const styles = StyleSheet.create({
   },
   center3: {
     //top: 50,
-    color: '#909090', 
+    color: '#909090',
     fontFamily: 'Avenir',
-    fontSize: 18, 
+    fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
     textAlign: 'center',
