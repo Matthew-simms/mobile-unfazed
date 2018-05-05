@@ -1,7 +1,7 @@
 import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar, Modal } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar, Modal, Linking } from 'react-native'
 import { Button } from 'react-native-elements'
-import { LinearGradient, Permissions, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
+import { LinearGradient, Permissions, WebBrowser, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -419,6 +419,21 @@ class Main extends React.Component {
     );
   }
 
+  // Open terms and conditions
+  _handleOpenTerms() {
+    WebBrowser.openBrowserAsync('http://unfazed.live/terms.html');
+  }
+
+   // Open terms and conditions
+   _handleOpenPrivacy() {
+    WebBrowser.openBrowserAsync('http://unfazed.live/privacy.html');
+  }
+
+   // Open terms and conditions
+   _handleOpenMail() {
+    Linking.openURL('mailto:support@expo.io');
+  }
+
   signOutUser = async () => {
     try {
         await firebase.auth().signOut();
@@ -619,13 +634,32 @@ class Main extends React.Component {
                 buttonStyle={[styles.button, styles.btnWidth100, styles.btmRightBtn]}
                 onPress={this.signOutUser.bind(this)}
                 />
-              {/* <Button
-                color={ "#6600EC" }
-                title={ 'Privacy Policy' }
-                rounded
-                buttonStyle={[styles.button, styles.btnWidth100,]}
-                onPress={this.signOutUser.bind(this)}
-                /> */}
+              <View style={{ position: 'absolute', padding: 10, alignItems: 'center', justifyContent: 'center' }}>
+                <Button
+                  color={ "#EEEEEE" }
+                  title={ 'Terms & Conditions' }
+                  rounded
+                  fontSize={12}
+                  buttonStyle={[ styles.privacyBtn]}
+                  onPress={this._handleOpenTerms.bind(this)}
+                  />
+                  <Button
+                  color={ "#EEEEEE" }
+                  title={ 'Privacy Policy' }
+                  rounded
+                  fontSize={12}
+                  buttonStyle={[ styles.privacyBtn]}
+                  onPress={this._handleOpenPrivacy.bind(this)}
+                  />
+                   <Button
+                  color={ "#EEEEEE" }
+                  title={ 'Support' }
+                  rounded
+                  fontSize={12}
+                  buttonStyle={[ styles.supportBtn]}
+                  onPress={this._handleOpenMail.bind(this)}
+                  />
+                </View>
             </ImageBackground>
           {/* </View> */}
         </View>
@@ -998,6 +1032,21 @@ const styles = StyleSheet.create({
   // button width longer
   btnWidth100: {
     width: 100,
+  },
+  // privacy button
+  privacyBtn: {
+    backgroundColor: 'transparent',
+    width: 180,
+    height: 30,
+    marginBottom: 10,
+  },
+  supportBtn: {
+    backgroundColor: 'transparent',
+    width: 100,
+    height: 30,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
   },
   // UI faces on list
   uiFace: {
