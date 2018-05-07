@@ -25,8 +25,8 @@ class auth extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
-            email: 'Test@test.com', 
-            password: '123456', error: '', 
+            email: '', 
+            password: '', error: '', 
             loading: false,
             userInfo: null,
             username: null,
@@ -162,7 +162,7 @@ class auth extends React.Component {
                     <FormInput
                     value = {this.state.username} 
                     onChangeText={username => this.setState({ username })}
-                    placeholder='Jonny'
+                    placeholder=''
                     /> 
                 </View>
                 : null }
@@ -170,13 +170,13 @@ class auth extends React.Component {
                 <FormInput
                  value = {this.state.email} 
                  onChangeText={email => this.setState({ email })}
-                 placeholder='john@icloud.com'
+                 placeholder=''
                  />
                 <FormLabel>Password</FormLabel>
                 <FormInput 
                 value = {this.state.password}
                 secureTextEntry
-                placeholder='*******'
+                placeholder=''
                 onChangeText={password => this.setState({ password })}
                 />
                 <Text>{this.state.error}</Text>

@@ -250,6 +250,7 @@ class CameraComponent extends React.Component {
                   height: 70,
                   backgroundColor: 'red',
                   borderRadius: 70,
+                  marginBottom: 20,
                 }}
               />
             </TouchableOpacity>

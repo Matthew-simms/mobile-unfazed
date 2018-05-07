@@ -715,8 +715,7 @@ class Main extends React.Component {
                 source={{ uri: videos[selectedVidIndex].instaVideoLink }}
                 onPlaybackStatusUpdate={this._playbackCallback.bind(this)}
                 rate={1.0}
-                volume={0.0}
-                muted={true}
+                volume={1.0}
                 resizeMode="cover"
                 shouldPlay={playVideo}
                 isLooping
@@ -797,7 +796,7 @@ class Main extends React.Component {
             ?  <View style={styles.camContainer}>{content}</View>
               :
               <View style={styles.modal}>
-              <Text style={[styles.text]}>Tap and hold the record button to film when you are at a music event</Text>
+              <Text style={[styles.camCenterText]}>Tap and hold the record button to film when you are at a music event</Text>
               <Button
                 onPress={this.toggleCamModal.bind(this)}
                 color={ "#6600EC" }
@@ -922,6 +921,14 @@ const styles = StyleSheet.create({
   emptyRow: {
     top: 50,
     height: 150,
+  },
+  camCenterText: {
+    color: '#fff',
+    fontFamily: 'Avenir',
+    fontSize: 18,
+    justifyContent: 'center',           // Center vertically
+    alignItems: 'center',
+    textAlign: 'center',
   },
   center1: {
     color: '#909090',
