@@ -108,7 +108,7 @@ class Main extends React.Component {
      */
     // GET all events currently on in London
     const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
-    //console.log('AllEventsRequest', allEventsRequest.data.payload)
+    console.log('AllEventsRequest', allEventsRequest.data.payload);
 
      // GET all events currently on in London with no videos - this is for location check for camera recording
      const allEventzRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/alleventz/uk?q=London')
@@ -261,7 +261,7 @@ class Main extends React.Component {
       }));
 
       // update selectedVenueIndex
-      this._handleSelectedEvent();
+      this._handleSelectedEvent(nextVenue);
     }
   }
 
@@ -294,6 +294,7 @@ class Main extends React.Component {
   }
 
   _onRowPress = ( rowData ) => {
+    console.log(rowData);
     // Navigate back to Home video screen
     this.swiper.scrollBy(1)
     // pass row event id data
@@ -305,13 +306,14 @@ class Main extends React.Component {
     }));
 
     // update selectedVenueIndex
-    this._handleSelectedEvent()
+    this._handleSelectedEvent(rowData);
   }
 
-  async _handleSelectedEvent () {
+  async _handleSelectedEvent(data) {
     // pass eventId from selected row
-    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + this.state.eventId);
-    // console.log(videoRequest)
+    console.log(data); 
+    const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + data.eventId);
+    console.log(videoRequest);
 
     // update video state with new videos
     this.setState(prevState => ({
@@ -404,7 +406,7 @@ class Main extends React.Component {
     } else if (state.index === 1) {
       this.setState({
         playVideo: true
-      })
+      });
     }
   }
 
