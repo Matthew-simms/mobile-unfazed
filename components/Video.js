@@ -154,7 +154,7 @@ class VideoComponent extends React.Component{
     for (var i = 0; i < arr.length; i++) {
       if (arr[i].isEventOn) {
         //searching within 0.2km
-        const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 0.2);
+        const result = isEventNear({ lng: location.coords.longitude, lat: location.coords.latitude }, { lng: arr[i].place.location.longitude, lat: arr[i].place.location.latitude }, 0.07);
         console.log('checking location', result);
         if (result) {
           this.props.startUniversalLoading();
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   center1: {
     //top: 50,
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   center2: {
     //top: 50,
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   center3: {
     //top: 50,
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',

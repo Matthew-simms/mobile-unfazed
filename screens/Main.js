@@ -205,6 +205,7 @@ class Main extends React.Component {
       bgImgsLoaded: true,
       venue: arr,
       data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
+      playVideo: true,
     }))
     this.props.storeEventData(this.state.locCheckData);
     console.log('loc check data', this.state.locCheckData)
@@ -786,9 +787,9 @@ class Main extends React.Component {
             <Text style={styles.center3}>you know when it's ready</Text>
           </View>
           <Button
-                onPress={() => this.setState({ isBuyTicketOpened: false })}
-                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50, marginTop: 100, marginLeft: 80, marginRight: 80,}}
-                title='Okay, Got it'/>
+            onPress={() => this.setState({ isBuyTicketOpened: false })}
+            buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50, marginTop: 100, marginLeft: 80, marginRight: 80,}}
+            title='Okay, Got it'/>
         </View>
         </Modal>
       </Swiper>
@@ -915,7 +916,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#fff',                      // White text color
     backgroundColor: 'transparent',     // No background
-    fontFamily: 'Avenir',               // Change default font
+    fontFamily: 'opensans',               // Change default font
   },
   //no data in list on Now text
   emptyRow: {
@@ -924,7 +925,7 @@ const styles = StyleSheet.create({
   },
   camCenterText: {
     color: '#fff',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
@@ -932,7 +933,7 @@ const styles = StyleSheet.create({
   },
   center1: {
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
@@ -940,7 +941,7 @@ const styles = StyleSheet.create({
   },
   center2: {
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
@@ -948,7 +949,7 @@ const styles = StyleSheet.create({
   },
   center3: {
     color: '#909090',
-    fontFamily: 'Avenir',
+    fontFamily: 'opensans',
     fontSize: 18,
     justifyContent: 'center',           // Center vertically
     alignItems: 'center',
