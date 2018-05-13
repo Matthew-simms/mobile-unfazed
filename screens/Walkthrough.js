@@ -1,7 +1,7 @@
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { LinearGradient, Font } from 'expo';
+import { LinearGradient, Font, Segment } from 'expo';
 import AppIntroSlider from 'react-native-app-intro-slider';
 
 const { width, height } = Dimensions.get('window');
@@ -67,6 +67,7 @@ export default class Walk extends React.Component {
 
           <TouchableOpacity
             onPress={() => {
+              Segment.track('from WalkThrough signup');
               /* 1. Navigate to the Auth route with params */
               this.props.navigation.navigate('Login', {
                 fromWalkThrough: 'SIGNUP',
@@ -78,6 +79,7 @@ export default class Walk extends React.Component {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
+              Segment.track('from WalkThrough login');
               /* 1. Navigate to the Auth route with params */
               this.props.navigation.navigate('Login', {
                 fromWalkThrough: 'LOGIN',

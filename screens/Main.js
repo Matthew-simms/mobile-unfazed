@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar, Modal, Linking } from 'react-native'
 import { Button } from 'react-native-elements'
-import { LinearGradient, Permissions, WebBrowser, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
+import { LinearGradient, Segment, Permissions, WebBrowser, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
 import randomcolor from 'randomcolor'
@@ -294,7 +294,14 @@ class Main extends React.Component {
     //call the push notification
   }
 
+
   _onRowPress = ( rowData ) => {
+    Expo.Segment.trackWithProperties('Tapped an event from list-->', {
+      eventId: rowData.eventId,
+      currentEvent: rowData.eventName,
+      venueName: rowData.place.name
+    })
+  
     console.log(rowData);
     // Navigate back to Home video screen
     this.swiper.scrollBy(1)
@@ -362,6 +369,7 @@ class Main extends React.Component {
 
   // next video function
   _nextVideo = (e) => {
+    Segment.track('next video-->');
     this.setState({ isPlaying: false });
 
     if (this.state.selectedVidIndex == this.state.videos.length - 1)
@@ -401,10 +409,12 @@ class Main extends React.Component {
   onScrollEnd = (e, state) => {
     console.log('INDEX IS: ', state.index);
     if (state.index === 2 || state.index === 0) {
+      Segment.track('not video screen');
       this.setState({
         playVideo: false
       });
     } else if (state.index === 1) {
+      Segment.track('video screen');
       this.setState({
         playVideo: true
       });
@@ -424,6 +434,7 @@ class Main extends React.Component {
 
   // Open terms and conditions
   _handleOpenTerms() {
+    Segment.track('open terms-->')
     WebBrowser.openBrowserAsync('http://unfazed.live/terms.html');
   }
 
@@ -432,15 +443,22 @@ class Main extends React.Component {
     WebBrowser.openBrowserAsync('http://unfazed.live/privacy.html');
   }
 
-   // Open terms and conditions
+   // Open support
    _handleOpenMail() {
-    Linking.openURL('mailto:support@expo.io');
+    Segment.track('Opened support-->');
+    Linking.openURL('mailto:matt@unfazed.live');
+  }
+
+  _handleBuyTickets() {
+    Segment.track('Buy tickets pressed-->')
+    this.setState({ isBuyTicketOpened: true })
   }
 
   signOutUser = async () => {
     try {
         await firebase.auth().signOut();
         navigate('auth');
+        Segment.track('sign out user-->')
     } catch (e) {
         console.log(e);
     }
@@ -471,12 +489,12 @@ class Main extends React.Component {
     )
   }
 
-  // list empty state
+  // On Now list empty state
   _renderEmpty () {
         <Text style={[styles.center]}>No events on right now, come back and check later or view some upcoming events below</Text>
   }
 
-
+  // Render upcoming item
   _renderItem = ({item, section}) => (
     <TouchableScale
               // Pass row style
@@ -529,10 +547,10 @@ class Main extends React.Component {
               <View style={ styles.elevationLow } borderRadius={9} >
                     <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
                         <LinearGradient
-                              colors={ !item.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : item.gradient_colors}
-                              start={[0.1,0.1]}
-                              end={[0.5,0.5]}
-                              style={{ padding: 20, borderRadius: 9 }}>
+                          colors={ !item.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : item.gradient_colors}
+                          start={[0.1,0.1]}
+                          end={[0.5,0.5]}
+                          style={{ padding: 20, borderRadius: 9 }}>
                             <View style={ styles.listBackground }>
                               <Text style={[styles.text, styles.red]}>On Now</Text>
                               <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
@@ -599,6 +617,7 @@ class Main extends React.Component {
                 {
                   data: venue,
                   title: 'On Now',
+                  // subtitle: 'this is a subtitle',
                   renderItem:  venue.length > 0 ? this._renderOnNowItem: this._renderEmpty,
                   keyExtractor: item => item.id,
                   ListEmptyComponent: this._renderEmpty
@@ -748,7 +767,7 @@ class Main extends React.Component {
                 <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
                 <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
                 <Button
-                onPress={() => this.setState({ isBuyTicketOpened: true })}
+                onPress={this._handleBuyTickets.bind(this)}
                 buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
                 title='Buy Tickets'/>
               </View>

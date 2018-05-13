@@ -55,10 +55,7 @@ export default class App extends React.Component {
       const userId = '3WP15cvWbn';
       Segment.initialize({ androidWriteKey, iosWriteKey });
       Segment.identify(userId);
-      Segment.track('Test track-->');
-      Segment.screen('Main');
-      Segment.screen('Login');
-      Segment.screen('WalThrough');
+      Segment.screen('App.js');
     }
     render() {
       if ( !this.state.isReady ) {

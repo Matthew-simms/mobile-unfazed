@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, AsyncStorage, StyleSheet } from 'react-native'
+import { View, Text, AsyncStorage, StyleSheet, StatusBar } from 'react-native'
 import * as firebase from 'firebase';
 import Main from './Main';
 import { StackNavigator } from 'react-navigation';
@@ -8,6 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import { login, loginFb, signup } from '../actions';
 import { mainCss } from '../styles/mainCss'
+import { Segment } from 'expo';
 
 firebase.initializeApp({
         apiKey: "AIzaSyAh5TKxXzav7bYBvyO9dKQnTtvKMxjE0C0",
@@ -35,10 +36,14 @@ class auth extends React.Component {
     }
 
     componentDidMount() {
+        Segment.screen('Login or Signup');
+
         console.log('userClickedSIGNUP', this.state.fromWalkThrough);
+        StatusBar.setHidden(true)
     }
 
    async onLoginPress() {
+        Segment.track('Login pressed-->');
 
         this.setState({ error: '', loading: true });
 
@@ -68,6 +73,8 @@ class auth extends React.Component {
       }
 
     onSignUpPress() {
+        Segment.track('Signup pressed-->');
+
         this.setState({ error: '', loading: true });
         const { email, password, username } = this.state;
 
@@ -93,6 +100,8 @@ class auth extends React.Component {
     }
 
   async loginWithFacebook() {
+    Segment.track('Social login pressed-->');
+
     this.setState({ error: '', loading: true });
     const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('1972286079755935', { permissions: ['public_profile', 'email'] })
 
