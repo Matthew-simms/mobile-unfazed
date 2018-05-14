@@ -28,6 +28,7 @@ export default class App extends React.Component {
             require('./assets/images/Slide_1_icon.png'),
             require('./assets/images/slide_2_icon.png'),
             require('./assets/images/slide_3_icon.png'),
+            require('./assets/images/spotify_logo.png'),
           ],
           fonts: [
             { 'katanas-edge': require('./assets/fonts/katanas-edge.ttf') },

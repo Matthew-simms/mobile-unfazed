@@ -69,7 +69,8 @@ class Main extends React.Component {
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)'],
-        ['rgba(155,0,154,0.8)', 'rgba(84,0,87,0.8)']],
+        ['rgba(155,0,154,0.8)', 'rgba(84,0,87,0.8)'],
+        ['rgba(152,0,155,0.8)', 'rgba(0,2,92,0.8)']],
     }
   }
 
@@ -449,9 +450,16 @@ class Main extends React.Component {
     Linking.openURL('mailto:matt@unfazed.live');
   }
 
-  _handleBuyTickets() {
+  _handleBuyTickets(ticketLink) {
     Segment.track('Buy tickets pressed-->')
-    this.setState({ isBuyTicketOpened: true })
+    // this.setState({ isBuyTicketOpened: true })
+    WebBrowser.openBrowserAsync(ticketLink);
+  }
+
+  _handleOpenSpotify(spotifyLink) {
+    Segment.track('Spotify link pressed-->')
+    // this.setState({ isBuyTicketOpened: true })
+    WebBrowser.openBrowserAsync(spotifyLink);
   }
 
   signOutUser = async () => {
@@ -761,27 +769,6 @@ class Main extends React.Component {
           <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
             {/* Background */}
             <View style={[styles.detailList]}>
-            {/* <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
-              <LinearGradient
-                colors={ !currentVenue.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : currentVenue.gradient_colors }
-                start={[0.1,0.1]}
-                end={[0.5,0.5]}
-                style={{ padding: 20, borderRadius: 9 }}>
-              <View style={styles.listBackgroundDt}>
-              { !currentVenue.upcomingEvent ?
-                <Text style={[styles.text, styles.red]}>On Now</Text>
-              : <Text style={[styles.text, styles.teal]}>Upcoming</Text> }
-                <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName}</Text>
-                <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
-                { currentVenue.upcomingEvent ?
-                <Button
-                onPress={this._handleBuyTickets.bind(this)}
-                buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
-                title='Buy Tickets'/> : null }
-              </View>
-              </LinearGradient>
-            </ImageBackground> */}
-
               {/* ON NOW event details card */}
               {!currentVenue.upcomingEvent ? 
               <ImageBackground source={{uri: currentVenue.bg_image_link}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
@@ -805,7 +792,8 @@ class Main extends React.Component {
                     <Text numberOfLines={2} style={[styles.text, styles.title, styles.teal]}>{currentVenue.eventName}</Text>
                     <Text style={[styles.text, styles.teal]}>@ {currentVenue.place.name}</Text>
                       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <TouchableOpacity style={{ width:"100%" }} activeOpacity={0.7} onPress={this._handleBuyTickets.bind(this)}>
+                      { currentVenue.ticketLink ?
+                        <TouchableOpacity style={{ width:"100%" }} activeOpacity={0.7} onPress={this._handleBuyTickets.bind(this, currentVenue.ticketLink)}>
                           <LinearGradient
                             colors={['#4c669f', '#00F7CF']}
                             start={[0,1]}
@@ -822,21 +810,55 @@ class Main extends React.Component {
                             </Text>
                           </LinearGradient>
                         </TouchableOpacity>
+                      :<View style={{ width:"100%" }} > 
+                        <LinearGradient
+                            colors={['#CECECE', '#CECECE']}
+                            start={[0,1]}
+                            end={[1,0]}
+                            style={{ padding: 15, alignItems: 'center', borderRadius: 50 }}>
+                            <Text
+                              style={{
+                                backgroundColor: 'transparent',
+                                fontSize: 15,
+                                fontFamily: 'opensansBold',
+                                color: '#fff',
+                              }}>
+                              Sold Out
+                            </Text>
+                          </LinearGradient>
+                        </View> }
                       </View>
                     </View>
                   </View>
                 </ImageBackground> }
-              {/* /* both details text */}
+                {/* /* Spotify link for upcoming */}
+              { currentVenue.upcomingEvent ?
+               <TouchableOpacity
+                onPress={this._handleOpenSpotify.bind(this, currentVenue.spotifyLink)}
+                activeOpacity={0.7}
+                >
+                  <View style={{width: width, height: 20, marginTop: 30, marginLeft: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
+                    <Image style={styles.uiFace} source={ require('../assets/images/spotify_logo.png') }/>
+                    <View style={{flexDirection: 'column', marginLeft: 10}}>
+                      <Text style={[styles.text, styles.spotifyGreen]}>Listen to on Spotify</Text>
+                      <Text style={[styles.textBold, styles.spotifyGreen]}>{currentVenue.eventName}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                : null
+              }
+              {/* /* both details currently playing */}
               { videos[selectedVidIndex] ?
                 <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
                   <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-                  <View style={{flexDirection: 'column'}}>
+                  <View style={{flexDirection: 'column', marginLeft: 10}}>
                     <Text style={[styles.text, styles.blk]}>Currently playing video by</Text>
-                    <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text>
+                    <Text style={[styles.textBold, styles.blk]}>{videos[selectedVidIndex].userName}</Text>
                   </View>
                 </View>
                 : null
               }
+              {/* details description */}
             <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
             </View>
           </View>
@@ -990,6 +1012,12 @@ const styles = StyleSheet.create({
     color: '#fff',                      // White text color
     backgroundColor: 'transparent',     // No background
     fontFamily: 'opensans',               // Change default font
+  },  
+  // Shared text style Bold
+  textBold: {
+    color: '#fff',                      // White text color
+    backgroundColor: 'transparent',     // No background
+    fontFamily: 'opensansBold',               // Change default font
   },
   //no data in list on Now text
   emptyRow: {
@@ -1049,6 +1077,10 @@ const styles = StyleSheet.create({
   },
   white: {
     color: '#fff'
+  },
+   // spotify color
+   spotifyGreen: {
+    color: '#1ED760',                      // Black text color
   },
   pb10: {
     bottom: 20
