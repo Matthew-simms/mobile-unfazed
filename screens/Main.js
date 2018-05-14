@@ -116,7 +116,7 @@ class Main extends React.Component {
     //this.noVenueData(allEventsRequest)
 
     // GET upcoming events in London
-    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
+    const upcomingEventsRequest = await axios.get('http://localhost:5000/v1/venues/upcoming/uk?q=London')
     .catch(function(error) {
       console.log('MEE:', error.message);
       throw error;
@@ -507,21 +507,22 @@ class Main extends React.Component {
               friction={3}
             >
              <View style={ styles.elevationLow } borderRadius={9} >
-                    <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
-                      <View style={[styles.listBackground, styles.paddingBg]}>
-                              <Text style={[styles.text, styles.red]}>Upcoming</Text>
-                              <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.red]}>{item.eventName.toUpperCase()}</Text>
-                              <Text style={[styles.text, styles.red]}>@ {item.place.name}</Text>
-                            </View>
-                            <Button
-                              onPress={this._onRowPress.bind(this, item)}
-                              color={ "#6600EC" }
-                              title={ 'Play' }
-                              rounded
-                              buttonStyle={[styles.button, styles.btmRightBtn, styles.pb10]}
-                            />
-                    </ImageBackground>
+                <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
+                  <View style={[styles.listBackground, styles.paddingBg]}>
+                    <Text style={[styles.text, styles.red]}>Upcoming</Text>
+                    <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.red]}>{item.eventName}</Text>
+                    <Text style={[styles.text, styles.red]}>@ {item.place.name}</Text>
+                    <Text style={[styles.text, styles.red]}>{item.place.startDate}</Text>
                   </View>
+                    <Button
+                      onPress={this._onRowPress.bind(this, item)}
+                      color={ "#6600EC" }
+                      title={ 'Play' }
+                      rounded
+                      buttonStyle={[styles.button, styles.btmRightBtn, styles.pb10]}
+                    />
+                </ImageBackground>
+              </View>
             </TouchableScale>
   )
   _renderOnNowItem = ({item, section}) => (
@@ -552,8 +553,10 @@ class Main extends React.Component {
                           end={[0.5,0.5]}
                           style={{ padding: 20, borderRadius: 9 }}>
                             <View style={ styles.listBackground }>
-                              <Text style={[styles.text, styles.red]}>On Now</Text>
-                              <Text  numberOfLines={2} style={[styles.text, styles.title]}>{item.eventName.toUpperCase()}</Text>
+                            <View style={ styles.onNowBg }>
+                              <Text style={[styles.text]}>On Now</Text>
+                            </View>
+                              <Text  numberOfLines={3} style={[styles.onNowText]}>{item.eventName}</Text>
                               <Text style={[styles.text]}>@ {item.place.name}</Text>
                                 <View style={styles.imageRow}>
                                   {item.uiFaces.payload ? this.UiPrinter(item.uiFaces.payload): null}
@@ -725,9 +728,11 @@ class Main extends React.Component {
                             padding: 10,
                             overflow: 'hidden'
                             }} >
+                 { !currentVenue.upcomingEvent ?
                 <Text style={[styles.text, styles.red]}>On Now</Text>
+              : <Text style={[styles.text, styles.teal]}>Upcoming</Text> }
                 {/* Title */}
-                <Text style={[styles.title]}>{currentVenue.eventName}</Text>
+                <Text numberOfLines={1} style={[styles.title]}>{currentVenue.eventName}</Text>
                 {/* Venue Name */}
                 <Text style={[styles.text]}>{currentVenue.place.name}</Text>
               </View>
@@ -763,13 +768,16 @@ class Main extends React.Component {
                 end={[0.5,0.5]}
                 style={{ padding: 20, borderRadius: 9 }}>
               <View style={styles.listBackgroundDt}>
+              { !currentVenue.upcomingEvent ?
                 <Text style={[styles.text, styles.red]}>On Now</Text>
-                <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName.toUpperCase()}</Text>
+              : <Text style={[styles.text, styles.teal]}>Upcoming</Text> }
+                <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName}</Text>
                 <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
+                { currentVenue.upcomingEvent ?
                 <Button
                 onPress={this._handleBuyTickets.bind(this)}
                 buttonStyle={{ backgroundColor: '#6600EC', borderRadius: 40, height: 50 }}
-                title='Buy Tickets'/>
+                title='Buy Tickets'/> : null }
               </View>
               </LinearGradient>
             </ImageBackground>
@@ -990,6 +998,9 @@ const styles = StyleSheet.create({
   red: {
     color: '#FF0000'
   },
+  teal: {
+    color: '#00F7CF'
+  },
   white: {
     color: '#fff'
   },
@@ -1013,8 +1024,16 @@ const styles = StyleSheet.create({
   },
   // title
   title: {
-    fontSize: 22,                       // Bigger font size
-    fontFamily: 'katanas-edge',
+    fontSize: 22, 
+    lineHeight: 28,                      // Bigger font size
+    fontFamily: 'opensansBold',
+    color: '#fff'
+  },
+  // on now text
+  onNowText: {
+    fontSize: 30,                       // Bigger font size
+    fontFamily: 'opensansBold',
+    lineHeight: 37,
     color: '#fff'
   },
    // upcomingtitle
@@ -1046,6 +1065,20 @@ const styles = StyleSheet.create({
   // Rating row
   rating: {
     flexDirection: 'row',               // Arrange icon and rating in one line
+  },
+  onNowBg: {
+    backgroundColor: '#C10000',
+    width: 80,
+    height: 30,
+    borderRadius: 3,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  // center text
+  cView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   button: {
     backgroundColor: '#EEEEEE',

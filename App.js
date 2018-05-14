@@ -32,6 +32,8 @@ export default class App extends React.Component {
           fonts: [
             { 'katanas-edge': require('./assets/fonts/katanas-edge.ttf') },
             { 'opensans': require('./assets/fonts/OpenSans.ttf') },
+            { 'opensansBold': require('./assets/fonts/OpenSans-Bold.ttf') },
+            { 'opensansLight': require('./assets/fonts/OpenSans-Light.ttf') },
           ],
         });
       } catch (e) {
