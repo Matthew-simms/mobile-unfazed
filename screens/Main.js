@@ -509,10 +509,10 @@ class Main extends React.Component {
              <View style={ styles.elevationLow } borderRadius={9} >
                 <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
                   <View style={[styles.listBackground, styles.paddingBg]}>
-                    <Text style={[styles.text, styles.red]}>Upcoming</Text>
-                    <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.red]}>{item.eventName}</Text>
-                    <Text style={[styles.text, styles.red]}>@ {item.place.name}</Text>
-                    <Text style={[styles.text, styles.red]}>{item.place.startDate}</Text>
+                    <Text style={[styles.text, styles.teal]}>Upcoming</Text>
+                    <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.teal]}>{item.eventName}</Text>
+                    <Text style={[styles.text, styles.blk]}>@ {item.place.name}</Text>
+                    <Text style={[styles.text, styles.blk]}>{item.place.startDate}</Text>
                   </View>
                     <Button
                       onPress={this._onRowPress.bind(this, item)}
@@ -761,7 +761,7 @@ class Main extends React.Component {
           <View style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}>
             {/* Background */}
             <View style={[styles.detailList]}>
-            <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
+            {/* <ImageBackground source={{uri: !currentVenue.upcomingEvent ? currentVenue.bg_image_link : currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
                 colors={ !currentVenue.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : currentVenue.gradient_colors }
                 start={[0.1,0.1]}
@@ -780,17 +780,63 @@ class Main extends React.Component {
                 title='Buy Tickets'/> : null }
               </View>
               </LinearGradient>
-            </ImageBackground>
-            { videos[selectedVidIndex] ?
-              <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
-                <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
-                <View style={{flexDirection: 'column'}}>
-                  <Text style={[styles.text, styles.blk]}>Currently playing video by</Text>
-                  <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text>
-                </View>
+            </ImageBackground> */}
+
+              {/* ON NOW event details card */}
+              {!currentVenue.upcomingEvent ? 
+              <ImageBackground source={{uri: currentVenue.bg_image_link}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
+              <LinearGradient
+                colors={ !currentVenue.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : currentVenue.gradient_colors }
+                start={[0.1,0.1]}
+                end={[0.5,0.5]}
+                style={{ padding: 20, borderRadius: 9 }}>
+              <View style={styles.listBackgroundDt}>
+                <Text style={[styles.text, styles.red]}>On Now</Text>
+                <Text numberOfLines={2} style={[styles.text, styles.title]}>{currentVenue.eventName}</Text>
+                <Text style={[styles.text]}>@ {currentVenue.place.name}</Text>
               </View>
-              : null
-            }
+              </LinearGradient>
+            </ImageBackground>
+             /* Upcoming event details card */
+            : <ImageBackground source={{uri: currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
+                <View style={{ padding: 20, borderRadius: 9 }}>
+                  <View style={styles.listBackgroundDt}>
+                    <Text style={[styles.text, styles.teal]}>Upcoming</Text> 
+                    <Text numberOfLines={2} style={[styles.text, styles.title, styles.teal]}>{currentVenue.eventName}</Text>
+                    <Text style={[styles.text, styles.teal]}>@ {currentVenue.place.name}</Text>
+                      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <TouchableOpacity style={{ width:"100%" }} activeOpacity={0.7} onPress={this._handleBuyTickets.bind(this)}>
+                          <LinearGradient
+                            colors={['#4c669f', '#00F7CF']}
+                            start={[0,1]}
+                            end={[1,0]}
+                            style={{ padding: 15, alignItems: 'center', borderRadius: 50 }}>
+                            <Text
+                              style={{
+                                backgroundColor: 'transparent',
+                                fontSize: 15,
+                                fontFamily: 'opensansBold',
+                                color: '#fff',
+                              }}>
+                              Buy Tickets
+                            </Text>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </ImageBackground> }
+              {/* /* both details text */}
+              { videos[selectedVidIndex] ?
+                <View style={{width: width, height: 100, padding: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
+                  <Image style={styles.uiFace} source={{uri: videos[selectedVidIndex].userPhotoLink}}/>
+                  <View style={{flexDirection: 'column'}}>
+                    <Text style={[styles.text, styles.blk]}>Currently playing video by</Text>
+                    <Text style={[styles.text, styles.blk]}>{videos[selectedVidIndex].userName}</Text>
+                  </View>
+                </View>
+                : null
+              }
             <Text style={[styles.text, styles.blk]}>{currentVenue.description}</Text>
             </View>
           </View>
