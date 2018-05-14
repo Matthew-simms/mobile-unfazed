@@ -65,6 +65,7 @@ class Main extends React.Component {
       signupModal: this.props.UserData.modal,
       cameraModal: this.props.UserData.modal,
       isBuyTicketOpened: false,
+      refreshing: false,
       fakeData: [],
       listColor: [
         ['rgba(0,36,155,0.8)', 'rgba(26,0,87,0.8)'],
@@ -117,7 +118,7 @@ class Main extends React.Component {
     //this.noVenueData(allEventsRequest)
 
     // GET upcoming events in London
-    const upcomingEventsRequest = await axios.get('http://localhost:5000/v1/venues/upcoming/uk?q=London')
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
     .catch(function(error) {
       console.log('MEE:', error.message);
       throw error;
@@ -433,6 +434,39 @@ class Main extends React.Component {
     );
   }
 
+  // refresh on pull
+  _handleRefresh = () => {
+    this.setState(
+      {
+        refreshing: true
+      },
+      () => {
+        this.makeRemoteRequest();
+      }
+    )
+  }
+
+  // remote request for upcoming
+  makeRemoteRequest = () => {
+    const { page, seed } = this.state;
+    const url = `http://localhost:5000/v1/venues/upcoming/uk?q=London`;
+    this.setState({ loading: true });
+
+    fetch(url)
+      .then(res => res.json())
+      .then(res => {
+        this.setState({
+          data: [...this.state.data, ...res.results.data.payload],
+          error: res.error || null,
+          loading: false,
+          refreshing: false
+        });
+      })
+      .catch(error => {
+        this.setState({ error, loading: false });
+      });
+  };
+
   // Open terms and conditions
   _handleOpenTerms() {
     Segment.track('open terms-->')
@@ -486,7 +520,11 @@ class Main extends React.Component {
 
   async refreshMainC() {
     console.log('Called to refresh');
-    await this.forceUpdate();
+    await this.forceUpdate().then(res => {
+      this.setState({
+        refreshing: false
+      });
+    })
   }
 
   _renderSectionHeader = ({section}) => {
@@ -624,6 +662,8 @@ class Main extends React.Component {
         renderItem={this._renderItem}
         renderSectionHeader={this._renderSectionHeader}
         stickySectionHeadersEnabled={false}
+        // refreshing={this.state.refreshing}
+        // onRefresh={this._handleRefresh}
               sections={[
                 {
                   data: venue,
@@ -835,12 +875,11 @@ class Main extends React.Component {
               { currentVenue.upcomingEvent ?
                <TouchableOpacity
                 onPress={this._handleOpenSpotify.bind(this, currentVenue.spotifyLink)}
-                activeOpacity={0.7}
-                >
+                activeOpacity={0.7} >
                   <View style={{width: width, height: 20, marginTop: 30, marginLeft: 10, flexDirection: 'row', alignItems: 'center', zIndex: 2, }}>
                     <Image style={styles.uiFace} source={ require('../assets/images/spotify_logo.png') }/>
                     <View style={{flexDirection: 'column', marginLeft: 10}}>
-                      <Text style={[styles.text, styles.spotifyGreen]}>Listen to on Spotify</Text>
+                      <Text style={[styles.text, styles.spotifyGreen]}>Listen on Spotify</Text>
                       <Text style={[styles.textBold, styles.spotifyGreen]}>{currentVenue.eventName}</Text>
                     </View>
                   </View>
