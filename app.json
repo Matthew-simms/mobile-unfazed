@@ -2,7 +2,7 @@
   "expo": {
     "name": "Unfazed",
     "icon": "./assets/images/app-icon.png",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "sdkVersion": "25.0.0",
     "facebookScheme": "fb1972286079755935",
     "orientation": "portrait",
@@ -17,7 +17,7 @@
     "privacy": "unlisted",
     "ios": {
       "bundleIdentifier": "com.unfazed.unfazedios",
-      "buildNumber": "1.0.1",
+      "buildNumber": "1.0.2",
       "infoPlist": {
         "NSCameraUsageDescription": "Unfazed uses the camera so you can film at music events.",
         "NSLocationWhenInUseUsageDescription": "We need to know your location so we can show you events nearby"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Platform, Modal, Dimensions, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements'
-import { Video, Location, Permissions, Constants } from 'expo';
+import { Video, Location, Permissions, Constants, Segment } from 'expo';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
 import { RNS3 } from 'react-native-aws3';
@@ -85,6 +85,7 @@ class VideoComponent extends React.Component{
 
     var postToEvent = (event) => {
       //console.log(event);
+      Segment.track('post video-->')
       const file = {
         uri,
         name,
