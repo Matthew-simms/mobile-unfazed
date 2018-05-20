@@ -456,7 +456,7 @@ class Main extends React.Component {
       .then(res => res.json())
       .then(res => {
         this.setState({
-          data: [...this.state.data, ...res.results.data.payload],
+          data: [...this.state.upcomingEvents, ...res.results.data.payload],
           error: res.error || null,
           loading: false,
           refreshing: false
