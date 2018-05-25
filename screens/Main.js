@@ -1,20 +1,24 @@
-import React from 'react'
-import { StyleSheet, Text, View, Dimensions, ListView, FlatList, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Slider, Vibration, ScrollView, SectionList, Platform, StatusBar, Modal, Linking } from 'react-native'
-import { Button } from 'react-native-elements'
-import { LinearGradient, Segment, Permissions, WebBrowser, Constants,  FileSystem, Font, Video, Notifications  } from 'expo'
-import axios from 'axios'
-import Swiper from 'react-native-swiper'
-import randomcolor from 'randomcolor'
-import { AnimatedCircularProgress } from 'react-native-circular-progress'
+import React from 'react';
+import { StyleSheet, Text, View, Dimensions, ListView, FlatList,
+  TouchableOpacity, Image, ImageBackground, ActivityIndicator,
+  Slider, Vibration, ScrollView, Platform, StatusBar, Modal, Linking } from 'react-native';
+import { Button } from 'react-native-elements';
+import { LinearGradient, Segment, Permissions, WebBrowser,
+  Constants,  FileSystem, Font, Video, Notifications  } from 'expo';
+import axios from 'axios';
+import Swiper from 'react-native-swiper';
+import randomcolor from 'randomcolor';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import GalleryScreen from '../components/GalleryScreen';
 import RootNavigation from '../navigation/RootNavigation';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { connect } from 'react-redux';
 import * as firebase from 'firebase';
-import TouchableScale from 'react-native-touchable-scale'
+import TouchableScale from 'react-native-touchable-scale';
 
 import { storeEventData } from '../actions';
 import CameraC from './Camera';
+import EventsComponent from '../components/Events';
 
 // Detect screen size to calculate row height
 const screen = Dimensions.get('window');
@@ -35,6 +39,9 @@ class Main extends React.Component {
     super(props, context);
 
     this.refreshMainC = this.refreshMainC.bind(this);
+    this.loadMoreUpcoming = this.loadMoreUpcoming.bind(this);
+    this.toggleEventsCLoading = this.toggleEventsCLoading.bind(this);
+    this.refreshEvents = this.refreshEvents.bind(this);
 
     // app state
     this.state = {
@@ -44,7 +51,7 @@ class Main extends React.Component {
       }),
       data: null,
       playbackInstanceDuration: null,
-      venue: [{"eventName": "exception"}],
+      venue: [{ "eventName": "exception" }],
       currentVenue: [],
       videos: [],
       eventId: null,
@@ -52,6 +59,8 @@ class Main extends React.Component {
       selectedVidIndex: 0,
       next: 1,
       isVenueLoading: true,
+      eventsCLoading: false,
+      eventsCUpcomingLoading: false,
       displayMediaInfo: false,
       venueBefore: false,
       shouldPlay: false,
@@ -62,6 +71,7 @@ class Main extends React.Component {
       bgImgsLoaded: false,
       playVideo: false,
       photoURL: '',
+      upcomingLimit: 2,
       signupModal: this.props.UserData.modal,
       cameraModal: this.props.UserData.modal,
       isBuyTicketOpened: false,
@@ -72,15 +82,14 @@ class Main extends React.Component {
         ['rgba(155,0,0,0.8)', 'rgba(87,0,0,0.8)'],
         ['rgba(155,0,154,0.8)', 'rgba(84,0,87,0.8)'],
         ['rgba(152,0,155,0.8)', 'rgba(0,2,92,0.8)']],
-    }
+    };
   }
 
   async componentDidMount() {
+    StatusBar.setHidden(true);
 
-    StatusBar.setHidden(true)
-
-    var currentUser
-    var that = this
+    var currentUser;
+    var that = this;
     listener = firebase.auth().onAuthStateChanged(function (user) {
       if (user != null) {
 
@@ -100,7 +109,7 @@ class Main extends React.Component {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ permissionsGranted: status === 'granted' });
 
-    console.log(this.props.modal)
+    console.log(this.props.modal);
 
     // pause video if user has signed in
     /*
@@ -109,26 +118,26 @@ class Main extends React.Component {
      * then pass eventId, GET videos in that event, load latest posted video
      */
     // GET all events currently on in London
-    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London')
+    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London');
     console.log('AllEventsRequest', allEventsRequest.data.payload);
 
      // GET all events currently on in London with no videos - this is for location check for camera recording
-     const allEventzRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/alleventz/uk?q=London')
+     const allEventzRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/alleventz/uk?q=London&start=0');
 
     //this.noVenueData(allEventsRequest)
 
     // GET upcoming events in London
-    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London')
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London&range=2')
     .catch(function(error) {
       console.log('MEE:', error.message);
       throw error;
     })
-    console.log(upcomingEventsRequest.data.payload)
+    console.log(upcomingEventsRequest.data.payload);
 
     let videoRequest = [];
-    if(allEventsRequest.data.payload.length == 0) {
+    if (allEventsRequest.data.payload.length == 0) {
       try {
-        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + upcomingEventsRequest.data.payload[0].eventId)
+        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + upcomingEventsRequest.data.payload[0].eventId);
         } catch (error) {
           console.log(error);
       }
@@ -137,7 +146,7 @@ class Main extends React.Component {
       });
     } else {
       try {
-        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[0].eventId)
+        videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + allEventsRequest.data.payload[0].eventId);
         } catch (error) {
           console.log(error);
       }
@@ -149,7 +158,7 @@ class Main extends React.Component {
       locCheckData: allEventzRequest.data.payload,
       currentVenue: allEventsRequest.data.payload.length == 0 ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload[0],
       videos: videoRequest.data.payload,
-      upcomingEvents : upcomingEventsRequest.data.payload,
+      upcomingEvents: upcomingEventsRequest.data.payload,
       selectedVenueIndex: 0,
       selectedVidIndex: 0,
       vidLink: videoRequest.data.payload[0].instaVideoLink,
@@ -175,10 +184,10 @@ class Main extends React.Component {
       .then((userFaces) => {
         console.log('uifaces1', userFaces);
         { arr.uiFaces = userFaces.data;}
-        })
-      const user = await response
+      });
+      const user = await response;
       console.log(user);
-    }))
+    }));
     this.setState(prevState => ({
       venue: arr,
     }))
@@ -207,12 +216,12 @@ class Main extends React.Component {
       bgImgsLoaded: true,
       venue: arr,
       data: arr.concat(this.state.upcomingEvents), // Old List data -- still used for the camera
-      playVideo: true,
-    }))
+      playVideo: false,
+    }));
     this.props.storeEventData(this.state.locCheckData);
-    console.log('loc check data', this.state.locCheckData)
-    console.log("RAW concat data", this.state.data)
-    console.log('testData', this.state)
+    console.log('loc check data', this.state.locCheckData);
+    console.log('RAW concat data', this.state.data);
+    console.log('testData', this.state);
   }
 
   // method to check if there is venue data
@@ -237,8 +246,7 @@ class Main extends React.Component {
         } else {
           nextVenue = this.state.upcomingEvents[0];
         }
-      }
-      else {
+      } else {
         selectedVenueIndex = this.state.upcomingEvents.findIndex(v => v.eventId == this.state.currentVenue.eventId);
         if (selectedVenueIndex >= 0) {
           if (selectedVenueIndex + 1 < this.state.upcomingEvents.length || this.state.venue.length == 0) {
@@ -296,32 +304,26 @@ class Main extends React.Component {
     //call the push notification
   }
 
+  eventsOnRowPress(x) {
+    console.log('eventsOnRowPress:', x);
 
-  _onRowPress = ( rowData ) => {
-    Expo.Segment.trackWithProperties('Tapped an event from list-->', {
-      eventId: rowData.eventId,
-      currentEvent: rowData.eventName,
-      venueName: rowData.place.name
-    })
-  
-    console.log(rowData);
     // Navigate back to Home video screen
-    this.swiper.scrollBy(1)
+    // send info this.swiper.scrollBy(1)
     // pass row event id data
     this.setState(prevState => ({
-      eventId: rowData.eventId,
-      currentVenue: rowData,
+      eventId: x.eventId,
+      currentVenue: x.currentVenue,
       // selectedVenueIndex: selectedVenueIndex,
-      isLoading: true
+      isLoading: x.isLoading
     }));
 
-    // update selectedVenueIndex
-    this._handleSelectedEvent(rowData);
+    //update selectedVenueIndex
+    this._handleSelectedEvent(x.rowData);
   }
 
   async _handleSelectedEvent(data) {
     // pass eventId from selected row
-    console.log(data); 
+    console.log(data);
     const videoRequest = await axios.get('https://concertly-app.herokuapp.com/v1/video?id=' + data.eventId);
     console.log(videoRequest);
 
@@ -382,19 +384,6 @@ class Main extends React.Component {
     }));
   }
 
-  // Map array and show UI faces in render
-  UiPrinter(array) {
-    if (array) {
-      return array.map(function(images, index) {
-        // don't put your key as index, choose other unique values as your key.
-        return <Image
-          key={index}
-          source={{uri: images.userPhotoLink}}
-          style={ styles.uiFace } />
-      });
-    }
-  }
-
   // function to choose a random index in an array
   _handleRandomIndex(arr) {
     return arr[Math.floor(Math.random() * arr.length)]
@@ -433,39 +422,6 @@ class Main extends React.Component {
       </View>
     );
   }
-
-  // refresh on pull
-  _handleRefresh = () => {
-    this.setState(
-      {
-        refreshing: true
-      },
-      () => {
-        this.makeRemoteRequest();
-      }
-    )
-  }
-
-  // remote request for upcoming
-  makeRemoteRequest = () => {
-    const { page, seed } = this.state;
-    const url = `http://localhost:5000/v1/venues/upcoming/uk?q=London`;
-    this.setState({ loading: true });
-
-    fetch(url)
-      .then(res => res.json())
-      .then(res => {
-        this.setState({
-          data: [...this.state.upcomingEvents, ...res.results.data.payload],
-          error: res.error || null,
-          loading: false,
-          refreshing: false
-        });
-      })
-      .catch(error => {
-        this.setState({ error, loading: false });
-      });
-  };
 
   // Open terms and conditions
   _handleOpenTerms() {
@@ -527,101 +483,122 @@ class Main extends React.Component {
     })
   }
 
-  _renderSectionHeader = ({section}) => {
-    return (
-      <View>
-        <Text style={styles.sectionTitle}>{section.title}</Text>
-      </View>
-    )
+  //Refresh events
+  async refreshEvents() {
+    // GET all events currently on in London
+    const allEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/allevents/uk?q=London');
+    console.log('AllEventsRequest', allEventsRequest.data.payload);
+
+     // GET all events currently on in London with no videos - this is for location check for camera recording
+     const allEventzRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/alleventz/uk?q=London&start=0');
+
+    //this.noVenueData(allEventsRequest)
+
+    // GET upcoming events in London
+    const upcomingEventsRequest = await axios.get('https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London&range=2')
+    .catch((error) => {
+      console.log('err:', error.message);
+      throw error;
+    });
+    console.log(upcomingEventsRequest.data.payload);
+
+    let videoRequest = [];
+    if (allEventsRequest.data.payload.length === 0) {
+      try {
+        videoRequest = await axios.get(`https://concertly-app.herokuapp.com/v1/video?id=${upcomingEventsRequest.data.payload[0].eventId}`);
+        } catch (error) {
+          console.log(error);
+      }
+      //comeBack may not need
+      this.setState({
+        isVenueLoading: false,
+      });
+    } else {
+      try {
+        videoRequest = await axios.get(`https://concertly-app.herokuapp.com/v1/video?id=${allEventsRequest.data.payload[0].eventId}`);
+        } catch (error) {
+          console.log(error);
+      }
+    }
+    this.noVideoData(videoRequest);
+
+    this.setState({
+      venue: allEventsRequest.data.payload,
+      locCheckData: allEventzRequest.data.payload,
+      currentVenue: allEventsRequest.data.payload.length === 0
+        ? upcomingEventsRequest.data.payload[0] : allEventsRequest.data.payload[0],
+      videos: videoRequest.data.payload,
+      upcomingEvents: upcomingEventsRequest.data.payload,
+      //selectedVenueIndex: 0,
+      //selectedVidIndex: 0,
+      vidLink: videoRequest.data.payload[0].instaVideoLink,
+      isVenueLoading: false,
+    });
+    console.log('Current venue', this.state.currentVenue);
+    await this.getUserFaces(allEventsRequest);
+    console.log('Stopping events loading');
+    //Stop loading in EventsComponent
+    this.setState({
+      eventsCLoading: false
+    });
   }
 
-  // On Now list empty state
-  _renderEmpty () {
-        <Text style={[styles.center]}>No events on right now, come back and check later or view some upcoming events below</Text>
+  toggleEventsCLoading() {
+    this.setState({
+      eventsCLoading: true
+    });
   }
 
-  // Render upcoming item
-  _renderItem = ({item, section}) => (
-    <TouchableScale
-              // Pass row style
-              style={styles.row}
-              // Call onPress function passed from List component when pressed
-              onPress={this._onRowPress.bind(this, item)}
-              // Dim row a little bit when pressed
-              activeScale={0.94}
-              tension={0}
-              friction={3}
-            >
-             <View style={ styles.elevationLow } borderRadius={9} >
-                <ImageBackground source={{uri: item.upcomingArt }} borderRadius={9} style={ styles.imageBackground }>
-                  <View style={[styles.listBackground, styles.paddingBg]}>
-                    <Text style={[styles.text, styles.teal]}>Upcoming</Text>
-                    <Text  numberOfLines={2} style={[styles.text, styles.titleUpcoming, styles.teal]}>{item.eventName}</Text>
-                    <Text style={[styles.text, styles.blk]}>@ {item.place.name}</Text>
-                    <Text style={[styles.text, styles.blk]}>{item.place.startDate}</Text>
-                  </View>
-                    <Button
-                      onPress={this._onRowPress.bind(this, item)}
-                      color={ "#6600EC" }
-                      title={ 'Play' }
-                      rounded
-                      buttonStyle={[styles.button, styles.btmRightBtn, styles.pb10]}
-                    />
-                </ImageBackground>
-              </View>
-            </TouchableScale>
-  )
-  _renderOnNowItem = ({item, section}) => (
-    section.length == 0 ? false :
-    item.eventName == "exception"
-    ?
-    <View style={ styles.emptyRow } borderRadius={9} >
-      <Text style={styles.center1}>No events on right now, come back</Text>
-      <Text style={styles.center2}>and check later or view some</Text>
-      <Text style={styles.center3}>upcoming events below</Text>
-    </View>
-    :
-    <TouchableScale
-              // Pass row style
-              style={styles.row}
-              // Call onPress function passed from List component when pressed
-              onPress={this._onRowPress.bind(this, item)}
-              // Dim row a little bit when pressed
-              activeScale={0.94}
-              tension={0}
-              friction={3}
-            >
-              <View style={ styles.elevationLow } borderRadius={9} >
-                    <ImageBackground source={{uri: item.bg_image_link }} borderRadius={9} style={ styles.imageBackground }>
-                        <LinearGradient
-                          colors={ !item.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : item.gradient_colors}
-                          start={[0.1,0.1]}
-                          end={[0.5,0.5]}
-                          style={{ padding: 20, borderRadius: 9 }}>
-                            <View style={ styles.listBackground }>
-                            <View style={ styles.onNowBg }>
-                              <Text style={[styles.text]}>On Now</Text>
-                            </View>
-                              <Text  numberOfLines={3} style={[styles.onNowText]}>{item.eventName}</Text>
-                              <Text style={[styles.text]}>@ {item.place.name}</Text>
-                                <View style={styles.imageRow}>
-                                  {item.uiFaces.payload ? this.UiPrinter(item.uiFaces.payload): null}
-                                  <Text style={styles.text}>{item.videoCount} Videos</Text>
-                                </View>
-                            </View>
-                            {item.eventName != this.state.currentVenue.eventName ?
-                            <Button
-                              onPress={this._onRowPress.bind(this, item)}
-                              color={ "#6600EC" }
-                              title={ 'Play' }
-                              rounded
-                              buttonStyle={[styles.button, styles.btmRightBtn]}
-                            />: <TouchableOpacity style={{ position: 'absolute', bottom: 30, right: 40 }}><Text style={{ color: 'white', fontSize: 18,}}>Playing</Text></TouchableOpacity>}
-                        </LinearGradient>
-                      </ImageBackground>
-                    </View>
-            </TouchableScale>
-  )
+  toggleEventsCUpcomingLoading() {
+    // this.setState({
+    //   eventsCUpcomingLoading: true
+    // });
+  }
+
+  async loadMoreUpcoming() {
+    console.log('Called load more upcoming events');
+
+    const newUpcomingRange = this.state.upcomingLimit + 2;
+    // GET upcoming events in London
+    const upcomingEventsRequest = await axios.get(`https://concertly-app.herokuapp.com/v1/venues/upcoming/uk?q=London&range=${newUpcomingRange}`)
+    .catch((error) => {
+      console.log('err:', error.message);
+      return;
+    });
+    console.log(upcomingEventsRequest.data.payload);
+
+    let videoRequest = [];
+    if (this.state.venue.length === 0) {
+      try {
+        videoRequest = await axios.get(`https://concertly-app.herokuapp.com/v1/video?id=${upcomingEventsRequest.data.payload[0].eventId}`);
+        } catch (error) {
+          console.log(error);
+      }
+      //May not be needed comeback
+      this.setState({
+        isVenueLoading: false,
+      });
+    } else {
+      try {
+        videoRequest = await axios.get(`https://concertly-app.herokuapp.com/v1/video?id=${this.state.venue[0].eventId}`);
+        } catch (error) {
+          console.log(error);
+      }
+    }
+    this.noVideoData(videoRequest);
+
+    this.setState({
+      videos: videoRequest.data.payload,
+      upcomingEvents: upcomingEventsRequest.data.payload,
+      //selectedVenueIndex: 0,
+      //selectedVidIndex: 0,
+      vidLink: videoRequest.data.payload[0].instaVideoLink,
+      isVenueLoading: false,
+      upcomingLimit: newUpcomingRange,
+      //eventsCUpcomingLoading: false
+    });
+    console.log('Current venue', this.state.currentVenue);
+  }
 
   render() {
     // Camera show state
@@ -658,30 +635,18 @@ class Main extends React.Component {
       onMomentumScrollEnd={this.onScrollEnd}
       >
       <View style={this.viewStyle()}>
-        <SectionList
-        renderItem={this._renderItem}
-        renderSectionHeader={this._renderSectionHeader}
-        stickySectionHeadersEnabled={false}
-        // refreshing={this.state.refreshing}
-        // onRefresh={this._handleRefresh}
-              sections={[
-                {
-                  data: venue,
-                  title: 'On Now',
-                  // subtitle: 'this is a subtitle',
-                  renderItem:  venue.length > 0 ? this._renderOnNowItem: this._renderEmpty,
-                  keyExtractor: item => item.id,
-                  ListEmptyComponent: this._renderEmpty
-                },
-                {
-                  data: this.state.upcomingEvents,
-                  title: 'Upcoming',
-                  renderItem: this._renderItem,
-                  keyExtractor: item => item.id,
-                  // ListEmptyComponent: this._renderEmpty
-                }
-              ]}
-             />
+      <EventsComponent
+        venue={venue}
+        upcomingEvents={this.state.upcomingEvents}
+        currentVenueEventName={this.state.currentVenue.eventName}
+        loadMoreUpcoming={this.loadMoreUpcoming}
+        refreshEvents={this.refreshEvents}
+        eventsCLoading={this.state.eventsCLoading}
+        toggleEventsCLoading={this.toggleEventsCLoading}
+        eventsOnRowPress={this.eventsOnRowPress.bind(this)}
+        eventsCUpcomingLoading={this.state.eventsCUpcomingLoading}
+        toggleEventsCUpcomingLoading={this.toggleEventsCUpcomingLoading.bind(this)}
+      />
       </View>
       <Swiper
         horizontal={false}
@@ -810,7 +775,7 @@ class Main extends React.Component {
             {/* Background */}
             <View style={[styles.detailList]}>
               {/* ON NOW event details card */}
-              {!currentVenue.upcomingEvent ? 
+              {!currentVenue.upcomingEvent ?
               <ImageBackground source={{uri: currentVenue.bg_image_link}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
               <LinearGradient
                 colors={ !currentVenue.gradient_colors ? ["rgba(155,0,0,0.8)","rgba(87,0,0,0.8)"] : currentVenue.gradient_colors }
@@ -828,7 +793,7 @@ class Main extends React.Component {
             : <ImageBackground source={{uri: currentVenue.upcomingArt}} borderRadius={9} style={ [styles.imageBackground, styles.elevationLow] }>
                 <View style={{ padding: 20, borderRadius: 9 }}>
                   <View style={styles.listBackgroundDt}>
-                    <Text style={[styles.text, styles.teal]}>Upcoming</Text> 
+                    <Text style={[styles.text, styles.teal]}>Upcoming</Text>
                     <Text numberOfLines={2} style={[styles.text, styles.title, styles.teal]}>{currentVenue.eventName}</Text>
                     <Text style={[styles.text, styles.teal]}>@ {currentVenue.place.name}</Text>
                       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -850,7 +815,7 @@ class Main extends React.Component {
                             </Text>
                           </LinearGradient>
                         </TouchableOpacity>
-                      :<View style={{ width:"100%" }} > 
+                      :<View style={{ width:"100%" }} >
                         <LinearGradient
                             colors={['#CECECE', '#CECECE']}
                             start={[0,1]}
@@ -994,7 +959,7 @@ const styles = StyleSheet.create({
   listBackgroundDt: {
     height: screen.height / 5,          // Divide screen height by 3
   },
-  paddingBg : {
+  paddingBg: {
     padding: 20,
     borderRadius: 9,
   },
@@ -1051,7 +1016,7 @@ const styles = StyleSheet.create({
     color: '#fff',                      // White text color
     backgroundColor: 'transparent',     // No background
     fontFamily: 'opensans',               // Change default font
-  },  
+  },
   // Shared text style Bold
   textBold: {
     color: '#fff',                      // White text color
@@ -1141,23 +1106,10 @@ const styles = StyleSheet.create({
   },
   // title
   title: {
-    fontSize: 22, 
+    fontSize: 22,
     lineHeight: 28,                      // Bigger font size
     fontFamily: 'opensansBold',
     color: '#fff'
-  },
-  // on now text
-  onNowText: {
-    fontSize: 30,                       // Bigger font size
-    fontFamily: 'opensansBold',
-    lineHeight: 37,
-    color: '#fff'
-  },
-   // upcomingtitle
-   titleUpcoming: {
-    fontSize: 38,                       // Bigger font size
-    fontFamily: 'katanas-edge',
-    color: 'red'
   },
   // section title
   sectionTitle: {
@@ -1182,14 +1134,6 @@ const styles = StyleSheet.create({
   // Rating row
   rating: {
     flexDirection: 'row',               // Arrange icon and rating in one line
-  },
-  onNowBg: {
-    backgroundColor: '#C10000',
-    width: 80,
-    height: 30,
-    borderRadius: 3,
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   // center text
   cView: {

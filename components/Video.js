@@ -256,7 +256,7 @@ class VideoComponent extends React.Component{
             <Text style={styles.buyTicketHeaderText}>OOPS!</Text>
           </View>
           <View style={styles.buyTicketContent}>
-            <Text style={styles.center1}>You're not at a music event</Text>
+            <Text style={styles.center1}>You are not at a music event</Text>
             <Text style={styles.center2}>try film when you are at</Text>
             <Text style={styles.center3}>one :D</Text>
           </View>
