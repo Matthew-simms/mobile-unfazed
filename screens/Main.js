@@ -550,9 +550,9 @@ class Main extends React.Component {
   }
 
   toggleEventsCUpcomingLoading() {
-    // this.setState({
-    //   eventsCUpcomingLoading: true
-    // });
+    this.setState({
+      eventsCUpcomingLoading: true
+    });
   }
 
   async loadMoreUpcoming() {
@@ -588,14 +588,14 @@ class Main extends React.Component {
     this.noVideoData(videoRequest);
 
     this.setState({
+      eventsCUpcomingLoading: false,
       videos: videoRequest.data.payload,
       upcomingEvents: upcomingEventsRequest.data.payload,
       //selectedVenueIndex: 0,
       //selectedVidIndex: 0,
       vidLink: videoRequest.data.payload[0].instaVideoLink,
       isVenueLoading: false,
-      upcomingLimit: newUpcomingRange,
-      //eventsCUpcomingLoading: false
+      upcomingLimit: newUpcomingRange
     });
     console.log('Current venue', this.state.currentVenue);
   }

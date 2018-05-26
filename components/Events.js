@@ -171,11 +171,12 @@ class EventsComponent extends React.Component {
 
   render() {
     console.log(this.props.upcomingEvents);
+
     let loadingUpcomingOrNot;
     if (this.props.eventsCUpcomingLoading) {
       loadingUpcomingOrNot = (
         <View style={[styles.container, styles.horizontal]}>
-          <ActivityIndicator size="large" color="#00ff00" />
+          <ActivityIndicator size="small" color="#00ff00" />
         </View>
       );
     } else {
