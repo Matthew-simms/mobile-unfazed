@@ -308,7 +308,7 @@ class Main extends React.Component {
     console.log('eventsOnRowPress:', x);
 
     // Navigate back to Home video screen
-    // send info this.swiper.scrollBy(1)
+    this.swiper.scrollBy(1);
     // pass row event id data
     this.setState(prevState => ({
       eventId: x.eventId,
